@@ -102,7 +102,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Docusaurus cache and generated files
 .docusaurus
@@ -128,3 +127,18 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+.DS_Store
+node_modules/**
+dist/*
+npm-debug.log
+yarn.lock
+package-lock.json
+selenium-debug.log
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

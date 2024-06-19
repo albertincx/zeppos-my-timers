@@ -1,0 +1,50 @@
+{
+  "configVersion": "v3",
+  "app": {
+    "appId": 1056908,
+    "appName": "My Timers",
+    "appType": "app",
+    "version": {
+      "code": 3,
+      "name": "3.0"
+    },
+    "icon": "iconApp.png",
+    "vender": "Albert Safiullin albertincx@gmail.com",
+    "description": "An app creates timers with alarm"
+  },
+  "permissions": [
+    "device:os.notification",
+    "data:os.device.info",
+    "device:os.alarm",
+    "device:os.local_storage"
+  ],
+  "runtime": {
+    "apiVersion": {
+      "compatible": "3.0",
+      "target": "3.0",
+      "minVersion": "3.0"
+    }
+  },
+  "targets": {
+    "common": {
+      "module": {
+        "page": {
+          "pages": [
+            "pages/alarm"
+          ]
+        },
+        "app-service": {
+          "services": ["app-service/index"]
+        }
+      },
+      "platforms": [
+        {
+          "st": "r"
+        }
+      ],
+      "designWidth": 480
+    }
+  },
+  "debug": false,
+  "defaultLanguage": "en-US"
+}

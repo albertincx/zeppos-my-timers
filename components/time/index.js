@@ -3,7 +3,7 @@ import {getDeviceInfo} from "@zos/device";
 import {Time} from "@zos/sensor";
 import * as Styles from "zosLoader:../../pages/style.[pf].layout.js";
 
-import {getTime, showHumanTimeStr, showTimeStr} from "../../utils/utils";
+import {showHumanTimeStr, getTimeStr} from "../../utils/utils";
 
 export const {TIMER_BTN} = Styles
 export const {width: DEVICE_WIDTH, height: DEVICE_HEIGHT} = getDeviceInfo()
@@ -11,7 +11,7 @@ const timeSensor = new Time();
 
 let animTimers = {};
 
-function countdown(targetDate, minusTime) {
+function countdown(targetDate, {minusTime}) {
     let percent = 100;
     const now = new Date().getTime();
     const targetTime = targetDate.getTime();
@@ -40,7 +40,7 @@ function countdown(targetDate, minusTime) {
     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-    const s = showHumanTimeStr({
+    const text = showHumanTimeStr({
         getHours() {
             return hours
         },
@@ -52,18 +52,23 @@ function countdown(targetDate, minusTime) {
         }
     }, true)
 
-    return {text: `${s}`, percent: percent};
+    return {text, percent};
 }
 
 export function putLiveTime(name = 'main', vc = hmUI, x, y, click_func) {
-    let minusTime;
+    let minusTime, isCountDown = false;
     if (typeof name === 'object') {
-        minusTime = getTime(name.name)
-        name = name.mttime;
+        isCountDown = name.isCountDown;
+        minusTime = name.dateFromStr;
+        name = name.alarmTime;
     }
-
     if (!animTimers[name]) {
-        animTimers[name] = {timerCount: 0, animTimer: null, minusTime};
+        animTimers[name] = {
+            timerCount: 0,
+            animTimer: null,
+            minusTime,
+            isCountDown
+        };
     }
 
     const isNotMain = name !== "main";
@@ -72,15 +77,18 @@ export function putLiveTime(name = 'main', vc = hmUI, x, y, click_func) {
         let text, t, percent;
         if (isNotMain) {
             t = new Date(name * 1000);
-            const obj = countdown(t, animTimers[name].minusTime)
+            const obj = countdown(t, animTimers[name])
             text = obj.text;
             percent = obj.percent || 100;
+            if (isCountDown) {
+                text = `Countdown\n${text}`
+            }
         } else {
-            text = 'Time: ' + showTimeStr(timeSensor)
+            text = 'Time: ' + getTimeStr(timeSensor)
         }
         if (isNotMain) {
             let txtSize = text.length > 10 ? 32 : 38;
-            const tW = TIMER_BTN.w / 1.3
+            const tW = Math.floor(TIMER_BTN.w / 1.3)
 
             const btn = vc.createWidget(hmUI.widget.BUTTON, {
                 ...TIMER_BTN,

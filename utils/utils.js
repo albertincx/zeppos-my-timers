@@ -1,13 +1,14 @@
 import {Time} from "@zos/sensor";
 import {getDeviceInfo} from "@zos/device";
-import {ACTIVE_REGEXP, ALARM_KEY} from "../config/constants";
+import {ACTIVE_REGEXP, ALARM_KEY, COUNTDOWN_KEY} from "../config/constants";
 
 const timeSensor = new Time();
 export const {height: DEVICE_HEIGHT, width: DEVICE_WIDTH} = getDeviceInfo();
 
 export const showTimeVal = (v) => v >= 10 ? v : '0' + v
-export const showTimeStr = (timeObj, show = false) => {
-    return `${showTimeVal(timeObj.getHours() - (show ? 8 : 0))}:${showTimeVal(timeObj.getMinutes())}:${showTimeVal(timeObj.getSeconds())}`
+
+export const getTimeStr = (timeObj) => {
+    return `${showTimeVal(timeObj.getHours())}:${showTimeVal(timeObj.getMinutes())}:${showTimeVal(timeObj.getSeconds())}`
 }
 
 export const getTimerStr = (v, end = '') => {
@@ -53,46 +54,47 @@ export const showHumanTimeStr = (timeObj, endStr = false) => {
 
     return `${hs}${sepH}${ms}${sepM}${ss}${endS}`
 }
-export const getTime = (name) => {
-    const nt = new Date();
+
+// get time from "00:00:00" string
+export const getTimeFromStr = (name) => {
+    const now = new Date();
+
     const names = name.replace(ACTIVE_REGEXP, '').split(':');
+
     if (names.length === 3) {
-        nt.setHours(...names);
-        return nt;
+        now.setHours(...names);
+        return now;
     }
 }
+
 export const getTT = (tt) => {
-    const mtt = `${tt}`.match(/(c|t)_([0-9]+)_((.*?))$/);
+    const mtt = `${tt}`.match(/([ct])_([0-9]+)_((.*?))$/);
     let name;
     if (mtt) {
         tt = mtt[2];
         name = mtt[3];
 
-        return {time: showTimeStr(new Date(tt * 1000)), timeRaw: tt, name};
+        return {time: getTimeStr(new Date(tt * 1000)), timeRaw: tt, name};
     }
 }
 
-export function getCTime() {
+export function getSensorTime() {
     return new Date(timeSensor.getTime());
 }
 
 export const getAlarmTime = (dTime) => {
-    let cTime = getCTime();
+    let cTime = getSensorTime();
     let h = dTime.getHours();
     let m = dTime.getMinutes();
     let s = dTime.getSeconds();
-    cTime.setHours(
-        cTime.getHours() + h,
-        cTime.getMinutes() + m,
-        cTime.getSeconds() + s,
-    );
+    cTime.setHours(cTime.getHours() + h, cTime.getMinutes() + m, cTime.getSeconds() + s,);
 
     return Math.floor(cTime.getTime() / 1000);
 }
 
 export function getCurrentTime() {
-    let cTime = getCTime();
-    cTime.setHours(timeSensor.getHours(), timeSensor.getMinutes() + 5, timeSensor.getSeconds())
+    let cTime = getSensorTime();
+    cTime.setHours(timeSensor.getHours(), timeSensor.getMinutes(), timeSensor.getSeconds())
 
     return cTime
 }
@@ -139,8 +141,13 @@ export function getTimeFromString(str) {
 export function splitObjectByValue(obj, condition) {
     return Object.entries(obj).reduce(
         (result, [key, value]) => {
-            if (condition(value)) {
-                result.active[key] = value;
+            const activeId = condition(key, value);
+            if (typeof activeId === "number") {
+                if (activeId === -1) {
+                    // skip
+                } else {
+                    result.active[key] = value;
+                }
             } else {
                 result.notActive[key] = value;
             }
@@ -152,10 +159,11 @@ export function splitObjectByValue(obj, condition) {
 
 export const getSortedKeys = (sortObj) => {
     let savedAlarms = []
-    let skeys = Object.keys(sortObj);
-    for (let sk = 0; sk < skeys.length; sk += 1) {
-        if (skeys[sk] && sortObj[skeys[sk]].key.match(ALARM_KEY)) {
-            savedAlarms.push(sortObj[skeys[sk]].key);
+    let sKeys = Object.keys(sortObj);
+    for (let sk = 0; sk < sKeys.length; sk += 1) {
+        let sKey = sKeys[sk];
+        if (sKey && (sortObj[sKey].key.match(ALARM_KEY) || sortObj[sKey].key.match(COUNTDOWN_KEY))) {
+            savedAlarms.push(sortObj[sKey].key);
         }
     }
     return savedAlarms;
@@ -164,17 +172,56 @@ export const getSortedKeys = (sortObj) => {
 export const getSortedObj = (obj) => {
     let sortObj = {};
     const sKeys = Object.keys(obj);
-    if (sKeys.length) {
-        for (let sk = 0; sk < sKeys.length; sk += 1) {
-            if (sKeys[sk] && `${sKeys[sk]}`.match(ALARM_KEY)) {
-                let v = obj[sKeys[sk]];
-                const hTime = getTimeFromString(v);
-                sortObj[hTime] = {
-                    key: sKeys[sk],
-                    value: v,
-                };
-            }
+    for (let sk = 0; sk < sKeys.length; sk += 1) {
+        let sKey = sKeys[sk];
+        if (sKey && (
+            `${sKey}`.match(ALARM_KEY)
+            || `${sKey}`.match(COUNTDOWN_KEY)
+        )
+        ) {
+            let v = obj[sKey];
+            // const hTime = getTimeFromString(v);
+            sortObj[sKey] = {
+                key: sKey,
+                value: v,
+            };
         }
     }
     return sortObj
 }
+//
+// const targetTimeInput = document.getElementById('targetTime');
+// const timezoneOffsetInput = document.getElementById('timezoneOffset');
+// const countdownDisplay = document.getElementById('countdown');
+// const currentTimeDisplay = document.getElementById('currentTime');
+
+export function formatTime(date) {
+    return date.toISOString().slice(0, 16);
+}
+
+export function formatCountdown(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+export function updateCountdown(ta, tz) {
+    const now = new Date();
+    const targetTime = new Date(ta);
+    const timezoneOffset = parseInt(tz) || 0;
+
+    const offsetTarget = new Date(targetTime.getTime() + timezoneOffset * 60 * 60 * 1000);
+    const diff = Math.floor((offsetTarget - now) / 1000);
+
+    if (diff > 0) {
+        return formatCountdown(diff);
+    } else {
+        return '00:00:00';
+    }
+
+    // currentTimeDisplay.textContent = `Current time (Your timezone): ${formatTime(now)}`;
+}
+
+// targetTimeInput.value = formatTime(new Date());
+// timezoneOffsetInput.value = -(new Date().getTimezoneOffset() / 60);

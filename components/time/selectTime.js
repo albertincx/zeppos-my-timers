@@ -4,19 +4,22 @@ import {
     DEVICE_HEIGHT,
     DEVICE_WIDTH,
     getAlarmTime,
-    getCTime,
     getCurrentTime,
-    showTimeStr,
+    getTimeStr,
     showTimeVal
 } from "../../utils/utils";
 import * as alarmMgr from "@zos/alarm";
 
 import {replace} from "@zos/router";
-import {ALARM_TARGET, HOME_TARGET} from "../../config/constants";
+// import {showToast} from "@zos/interaction";
 
-let showTime = getCurrentTime();
+import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, HOME_TARGET} from "../../config/constants";
+
 let dateTime = new Date();
-let vc = null;
+// visible time
+let showTime;
+// old time for countDown
+let oldDate;
 const globalData = getApp()._options.globalData;
 
 let changedHour;
@@ -35,48 +38,50 @@ let alarmObj = {
 };
 
 export function setupAlarm(dTime, timer = false) {
+    if (!dTime) return;
+
     try {
         const isCreateTimer = timer === true;
         const isStartTimer = typeof timer === 'string';
-        let name = showTimeStr(dTime);
-
-        if (timer) {
-            let cTime = getCTime();
-            let h = dTime.getHours();
-            let m = dTime.getMinutes();
-            let s = dTime.getSeconds();
-            cTime.setHours(
-                cTime.getHours() + h,
-                cTime.getMinutes() + m,
-                cTime.getSeconds() + s,
-            );
-            alarmObj.time = getAlarmTime(dTime);
-        } else {
-            dTime.setHours(dTime.getHours() + 8)
-            alarmObj.time = Math.floor(dTime.getTime() / 1000);
-        }
-        const paramVal = `${timer ? 't_' : 'c_'}${alarmObj.time}${timer ? `_${name}` : ''}`;
+        let name = getTimeStr(dTime);
+        alarmObj.time = getAlarmTime(dTime);
+        let paramVal = `${timer ? 't_' : 'c_'}${alarmObj.time}${name ? `_${name}` : ''}`;
         alarmObj.param = paramVal;
 
-        let id = isCreateTimer ? -1 : alarmMgr.set(alarmObj);
-        if (id == 0) {
-            //
+        let STORE_KEY = `${timer ? ALARM_KEY : COUNTDOWN_KEY}${name}`;
+        if (timer && typeof timer === 'string') STORE_KEY = timer
+
+        const exists = globalData.localStorage.getItem(STORE_KEY);
+        let id;
+        if (isCreateTimer) {
+            id = -1
+        } else {
+            if (!timer && exists) {
+                //
+            } else {
+                id = alarmMgr.set(alarmObj);
+            }
+        }
+        if (id === 0) {
+            // cant setup
+            console.log('cant setup id');
+            console.log(id);
         } else {
             // save w Time
             if (timer) {
-                let ALARM_KEY = `alarmId${timer ? name : paramVal}`;
-                if (typeof timer === 'string') {
-                    ALARM_KEY = timer
+                if (isCreateTimer && exists) {
+                    paramVal = '';
                 }
-                if (isCreateTimer && globalData.localStorage.getItem(ALARM_KEY)) {
-                    // exists
-                } else {
-                    let val = paramVal;
-                    if (isStartTimer) val = clearParam(paramVal) + `_=${id}=`;
-
-                    globalData.localStorage.setItem(ALARM_KEY, val);
-                }
+            } else {
+                if (exists) paramVal = '';
             }
+            if (isStartTimer || (!timer && !exists)) {
+                paramVal = clearParam(paramVal) + `_=${id}=`;
+            }
+            if (paramVal) {
+                globalData.localStorage.setItem(STORE_KEY, paramVal);
+            }
+
             replace({
                 url: HOME_TARGET,
                 params: 'skip',
@@ -87,7 +92,7 @@ export function setupAlarm(dTime, timer = false) {
     }
 }
 
-function hideDialog() {
+function hideDialog(vc) {
     hmUI.deleteWidget(vc), (vc = null);
     hmUI.redraw();
 }
@@ -95,16 +100,25 @@ function hideDialog() {
 const timePickerCb = (timer = false) => (picker, event_type, column, value_index) => {
     const dTime = dateTime;
 
-    if (event_type == 1) {
-        // changedTimer = true;
+    oldDate = getCurrentTime();
+
+    if (event_type === 1) {
         // update
         switch (column) {
             case 0: // hour
-                dTime.setHours(value_index);
+                if (!timer) {
+                    showTime.setHours(value_index);
+                } else {
+                    dTime.setHours(value_index);
+                }
                 changedHour = true;
                 break;
             case 1: // minute
-                dTime.setMinutes(value_index);
+                if (!timer) {
+                    showTime.setMinutes(value_index);
+                } else {
+                    dTime.setMinutes(value_index);
+                }
                 changedMin = true;
                 break;
             case 2: // second
@@ -112,22 +126,42 @@ const timePickerCb = (timer = false) => (picker, event_type, column, value_index
                 changedSec = true;
                 break;
         }
-    } else if (event_type == 2) {
+    } else if (event_type === 2) {
+        // let s;
         // done
-        if (!changedHour) dTime.setHours(0);
-        if (!changedMin) dTime.setMinutes(5);
+        if (!changedHour) {
+            dTime.setHours(0);
+        } else {
+            if (!timer) {
+                dTime.setHours(showTime.getHours() - oldDate.getHours());
+            }
+        }
+
+        if (!changedMin) {
+            if (timer) {
+                dTime.setMinutes(5);
+            } else {
+                dTime.setMinutes((showTime.getMinutes()) - oldDate.getMinutes());
+            }
+        } else {
+            if (!timer) {
+                dTime.setMinutes(showTime.getMinutes() - oldDate.getMinutes());
+            }
+        }
+
         if (!changedSec) dTime.setSeconds(0);
 
+        // showToast({content: `${JSON.stringify(dTime)}`});
         setupAlarm(dTime, timer);
-        hideDialog();
+        hideDialog(vc);
 
         changedHour = undefined
         changedMin = undefined
     }
 } // end timePickerCb
 
-export function selectTime(timer = false, vc) {
-    vc = hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
+export function selectTime(timer = false) {
+    let vc = hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
         x: 0,
         y: 0,
         w: DEVICE_WIDTH,
@@ -136,12 +170,13 @@ export function selectTime(timer = false, vc) {
     });
     // just show time
     showTime = getCurrentTime()
+    showTime.setMinutes(showTime.getMinutes() + 5);
     const h = !timer ? showTime.getHours() : 0
     const m = !timer ? showTime.getMinutes() : 5
-    if (!timer) {
-        dateTime = new Date();
-        dateTime.setMinutes(dateTime.getMinutes() + 5);
-    }
+    dateTime = new Date();
+    changedHour = false;
+    changedMin = false;
+    changedSec = false;
 
     vc.createWidget(hmUI.widget.WIDGET_PICKER, {
         title: timer ? 'Create timer' : 'CountDown',
@@ -166,6 +201,8 @@ export function selectTime(timer = false, vc) {
                 unit: 'Sec',
             },
         ],
-        picker_cb: timePickerCb(timer),
+        picker_cb: timePickerCb(timer, vc),
     });
+
+    return vc;
 } // end selectTime

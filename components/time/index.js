@@ -1,12 +1,13 @@
 import * as hmUI from "@zos/ui";
 import {getDeviceInfo} from "@zos/device";
 import {Time} from "@zos/sensor";
+
 import * as Styles from "zosLoader:../../pages/style.[pf].layout.js";
 
-import {showHumanTimeStr, getTimeStr} from "../../utils/utils";
+import {getTimeStr, showHumanTimeStr} from "../../utils/utils";
 
 export const {TIMER_BTN} = Styles
-export const {width: DEVICE_WIDTH, height: DEVICE_HEIGHT} = getDeviceInfo()
+export const {width: DEVICE_WIDTH} = getDeviceInfo()
 const timeSensor = new Time();
 
 let animTimers = {};

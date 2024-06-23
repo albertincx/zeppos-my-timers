@@ -1,6 +1,6 @@
 import {Time} from "@zos/sensor";
 import {getDeviceInfo} from "@zos/device";
-import {ACTIVE_REGEXP, ALARM_KEY, COUNTDOWN_KEY} from "../config/constants";
+import {ACTIVE_REGEXP, ALARM_KEY, CLEAR_KEY, COUNTDOWN_KEY} from "../config/constants";
 
 const timeSensor = new Time();
 export const {height: DEVICE_HEIGHT, width: DEVICE_WIDTH} = getDeviceInfo();
@@ -68,8 +68,9 @@ export const getTimeFromStr = (name) => {
 }
 
 export const getTT = (tt) => {
-    const mtt = `${tt}`.match(/([ct])_([0-9]+)_((.*?))$/);
+    const mtt = `${tt}`.match(/([ct])_([0-9]+)_(.*?)$/);
     let name;
+    console.log(mtt);
     if (mtt) {
         tt = mtt[2];
         name = mtt[3];
@@ -112,14 +113,13 @@ export const getActiveId = (val) => {
 
 export function sortObjectByTimeKeys(obj) {
     return Object.keys(obj)
-        .sort((a, b) => {
+        .sort((a1, b1) => {
+            const a = a1.replace(CLEAR_KEY, '')
+            const b = b1.replace(CLEAR_KEY, '')
             const timeA = a.split(':').map(Number);
             const timeB = b.split(':').map(Number);
-
             for (let i = 0; i < 3; i++) {
-                if (timeA[i] !== timeB[i]) {
-                    return timeA[i] - timeB[i];
-                }
+                if (timeA[i] !== timeB[i]) return timeA[i] - timeB[i];
             }
 
             return 0;
@@ -128,14 +128,6 @@ export function sortObjectByTimeKeys(obj) {
             sortedObj[key] = obj[key];
             return sortedObj;
         }, {});
-}
-
-export function getTimeFromString(str) {
-    const parts = str.split('_');
-    if (parts.length >= 3) {
-        return parts[2];
-    }
-    return null;
 }
 
 export function splitObjectByValue(obj, condition) {
@@ -180,7 +172,6 @@ export const getSortedObj = (obj) => {
         )
         ) {
             let v = obj[sKey];
-            // const hTime = getTimeFromString(v);
             sortObj[sKey] = {
                 key: sKey,
                 value: v,
@@ -189,39 +180,3 @@ export const getSortedObj = (obj) => {
     }
     return sortObj
 }
-//
-// const targetTimeInput = document.getElementById('targetTime');
-// const timezoneOffsetInput = document.getElementById('timezoneOffset');
-// const countdownDisplay = document.getElementById('countdown');
-// const currentTimeDisplay = document.getElementById('currentTime');
-
-export function formatTime(date) {
-    return date.toISOString().slice(0, 16);
-}
-
-export function formatCountdown(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
-
-export function updateCountdown(ta, tz) {
-    const now = new Date();
-    const targetTime = new Date(ta);
-    const timezoneOffset = parseInt(tz) || 0;
-
-    const offsetTarget = new Date(targetTime.getTime() + timezoneOffset * 60 * 60 * 1000);
-    const diff = Math.floor((offsetTarget - now) / 1000);
-
-    if (diff > 0) {
-        return formatCountdown(diff);
-    } else {
-        return '00:00:00';
-    }
-
-    // currentTimeDisplay.textContent = `Current time (Your timezone): ${formatTime(now)}`;
-}
-
-// targetTimeInput.value = formatTime(new Date());
-// timezoneOffsetInput.value = -(new Date().getTimezoneOffset() / 60);

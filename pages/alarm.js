@@ -2,6 +2,7 @@ import {log} from "@zos/utils";
 import hmUI from "@zos/ui";
 import {replace} from "@zos/router";
 import * as alarmMgr from "@zos/alarm";
+import {setScrollLock} from '@zos/page'
 import {GESTURE_RIGHT, onGesture} from "@zos/interaction";
 
 import * as Styles from "zosLoader:./style.[pf].layout.js";
@@ -20,10 +21,8 @@ import {
 } from "../utils/utils";
 import {selectTime, setupAlarm} from "../components/time/selectTime";
 import {ALARM_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
-import {setScrollLock} from '@zos/page'
 
-const {DEVICE_WIDTH, BUTTON_Y, TIMER_BTN, BUTTON_LIST} = Styles;
-
+const {DEVICE_WIDTH, BUTTON_Y, TIMER_BTN} = Styles;
 //✓
 let selectTimeVc = null;
 
@@ -33,9 +32,8 @@ Page({
         activeIds: [],
     },
     onInit(param) {
-        if (param === 'skip') {
-            setScrollLock({lock: false});
-        }
+        if (param === 'skip') setScrollLock({lock: false});
+
         onGesture(function (event) {
             if (event === GESTURE_RIGHT) {
                 if (selectTimeVc) {
@@ -54,35 +52,38 @@ Page({
         putLiveTime();
         const that = this;
         const activeAlarms = alarmMgr.getAllAlarms();
-        const {active, notActive} = splitObjectByValue(
-            globalData.localStorage.store
-            ,
-            (k, v) => {
-                const activeId = getActiveId(v);
-                if (activeId) {
-                    if (activeAlarms.includes(activeId)) return activeId;
-
-                    if (k.match(COUNTDOWN_KEY)) {
-                        globalData.localStorage.removeItem(k);
-                        return -1;
-                    }
+        const conditionFunction = (k, v) => {
+            const activeId = getActiveId(v);
+            if (activeId) {
+                if (activeAlarms.includes(activeId)) return activeId;
+                if (k.match(COUNTDOWN_KEY)) {
+                    globalData.localStorage.removeItem(k);
+                    return -1;
                 }
-            },
+            }
+        }
+        const {active, notActive} = splitObjectByValue(
+            globalData.localStorage.store,
+            conditionFunction,
             activeAlarms
         );
         let sortActiveObj = getSortedObj(active);
         let sortNotActiveObj = getSortedObj(notActive);
         sortActiveObj = sortObjectByTimeKeys(sortActiveObj);
         sortNotActiveObj = sortObjectByTimeKeys(sortNotActiveObj);
+        // console.log('Object.keys(globalData.localStorage.store).join()')
+        // console.log(Object.keys(sortActiveObj).join('\n'))
+        // console.log(Object.keys(sortNotActiveObj).join('\n'))
+        // showToast({content: `${Object.keys(sortNotActiveObj).join('\n')}`})
 
         function listAlarms(alarms, fromLs = false, iiParam = 0) {
             if (alarms.length === 0) return 0
 
             let ii = iiParam;
             // render alarms
-            alarms.forEach((alarmIndex) => {
-                const A_KEY = fromLs ? alarmIndex : `${ALARM_KEY}${alarmIndex}`;
-                if (!fromLs && that.state.activeIds.includes(alarmIndex)) {
+            alarms.forEach((alarmNumOrKey) => {
+                const A_KEY = fromLs ? alarmNumOrKey : `${ALARM_KEY}${alarmNumOrKey}`;
+                if (!fromLs && that.state.activeIds.includes(alarmNumOrKey)) {
                     return;
                 }
                 let storeVal = globalData.localStorage.getItem(A_KEY);
@@ -90,7 +91,9 @@ Page({
                 const isCountDown = !!A_KEY.match(COUNTDOWN_KEY);
 
                 if (!fromLs && !storeVal) {
-                    storeVal = globalData.localStorage.getItem(`${COUNTDOWN_KEY}${alarmIndex}`)
+                    storeVal = globalData.localStorage.getItem(`${COUNTDOWN_KEY}${alarmNumOrKey}`)
+                    console.log('storeVal 1');
+                    console.log(storeVal);
                 }
                 let timeRaw = storeVal;
                 let activeId = getActiveId(storeVal)
@@ -129,12 +132,12 @@ Page({
                         if (fromLs) {
                             if (!activeId) {
                                 // start from store
-                                setupAlarm(dateFromStr, alarmIndex);
+                                setupAlarm(dateFromStr, alarmNumOrKey);
                             }
                             return;
                         }
 
-                        alarmMgr.cancel(activeId || alarmIndex);
+                        alarmMgr.cancel(activeId || alarmNumOrKey);
 
                         replace({
                             url: HOME_TARGET,
@@ -147,16 +150,16 @@ Page({
                             alarmTime,
                             dateFromStr,
                             isCountDown
-                        }, hmUI, 75, BUTTON_Y + BUTTON_LIST * ii, click_func);
+                        }, hmUI, 75, BUTTON_Y + Styles.BUTTON_LIST * ii, click_func);
                     } else {
                         let txtSize = timeRaw && timeRaw.length > 10 ? TIMER_BTN.text_size - 18 : TIMER_BTN.text_size;
-                        let text = `${fromLs ? '' : 'Alarm '}${activeId ? '' : (timeRaw || alarmIndex)}`;
+                        let text = `${fromLs ? '' : 'Alarm '}${activeId ? '' : (timeRaw || alarmNumOrKey)}`;
 
                         hmUI.createWidget(hmUI.widget.BUTTON, {
                             ...TIMER_BTN,
                             text_size: txtSize,
                             normal_color: activeId ? 0x1976d2 : TIMER_BTN.normal_color,
-                            y: BUTTON_Y + BUTTON_LIST * ii,
+                            y: BUTTON_Y + Styles.BUTTON_LIST * ii,
                             text,
                             w: fromLs ? TIMER_BTN.w / 1.3 : TIMER_BTN.w,
                             click_func,
@@ -170,11 +173,11 @@ Page({
                             text: '',
                             h: activeId ? TIMER_BTN.h / 2 - 5 : TIMER_BTN.h,
                             x: DEVICE_WIDTH / 2 + leftMini,
-                            y: BUTTON_Y + BUTTON_LIST * ii + 5,
+                            y: BUTTON_Y + Styles.BUTTON_LIST * ii + 5,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
-                                let deleteAlarm = activeId || alarmIndex;
-                                globalData.localStorage.removeItem(alarmIndex);
+                                let deleteAlarm = activeId || alarmNumOrKey;
+                                globalData.localStorage.removeItem(alarmNumOrKey);
 
                                 if (deleteAlarm) alarmMgr.cancel(deleteAlarm)
 
@@ -192,7 +195,7 @@ Page({
                             // h: TIMER_BTN.h / 2 - 5,
                             h: !isCountDown ? TIMER_BTN.h / 2 - 5 : TIMER_BTN.h,
                             x: DEVICE_WIDTH / 2 + leftMini,
-                            y: BUTTON_Y + BUTTON_LIST * ii + offsetEdit,
+                            y: BUTTON_Y + Styles.BUTTON_LIST * ii + offsetEdit,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
                                 alarmMgr.cancel(activeId);
@@ -215,6 +218,9 @@ Page({
         let marginTopItems = 0;
         let savedActiveAlarms = getSortedKeys(sortActiveObj);
         let savedNotActiveAlarms = getSortedKeys(sortNotActiveObj);
+        // showToast({content: `${Object.keys(savedNotActiveAlarms).join('\n')}`})
+        // showToast({content: `${savedNotActiveAlarms.join('\n')}`})
+
         // show stored
         marginTopItems = listAlarms(savedActiveAlarms, true, marginTopItems);
         const marginTopItemsNA = listAlarms(savedNotActiveAlarms, true, marginTopItems);
@@ -241,7 +247,7 @@ Page({
             w: DEVICE_WIDTH / 2,
             x: DEVICE_WIDTH / 4,
             text: '+TIMER',
-            y: BUTTON_Y + BUTTON_LIST * marginTopItems,
+            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
                 selectTimeVc = selectTime(true)
                 setScrollLock({lock: true})
@@ -254,7 +260,7 @@ Page({
             h: TIMER_BTN.h,
             text: '+COUNTDOWN',
             text_size: 42,
-            y: BUTTON_Y + BUTTON_LIST * marginTopItems,
+            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
                 selectTimeVc = selectTime(false)
                 setScrollLock({lock: true})
@@ -267,7 +273,7 @@ Page({
             h: 40,
             text: '',
             text_size: 22,
-            y: BUTTON_Y + BUTTON_LIST * marginTopItems,
+            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
         });
 
         // Show scrollbar

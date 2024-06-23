@@ -97,7 +97,7 @@ function hideDialog(vc) {
     hmUI.redraw();
 }
 
-const timePickerCb = (timer = false) => (picker, event_type, column, value_index) => {
+const timePickerCb = (timer = false, vc) => (picker, event_type, column, value_index) => {
     const dTime = dateTime;
 
     oldDate = getCurrentTime();

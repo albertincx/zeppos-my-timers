@@ -1,7 +1,7 @@
 import {px} from "@zos/utils";
 import {getDeviceInfo} from "@zos/device";
 
-export const {width: DEVICE_WIDTH, height: DEVICE_HEIGHT} = getDeviceInfo()
+export const {width: DEVICE_WIDTH} = getDeviceInfo()
 
 export const BUTTON_X = px(70);
 export const BUTTON_W = DEVICE_WIDTH - 2 * BUTTON_X;

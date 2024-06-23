@@ -70,7 +70,6 @@ export const getTimeFromStr = (name) => {
 export const getTT = (tt) => {
     const mtt = `${tt}`.match(/([ct])_([0-9]+)_(.*?)$/);
     let name;
-    console.log(mtt);
     if (mtt) {
         tt = mtt[2];
         name = mtt[3];

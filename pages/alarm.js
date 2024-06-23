@@ -70,7 +70,7 @@ Page({
         let sortActiveObj = getSortedObj(active);
         let sortNotActiveObj = getSortedObj(notActive);
         sortActiveObj = sortObjectByTimeKeys(sortActiveObj);
-        sortNotActiveObj = sortObjectByTimeKeys(sortNotActiveObj);
+        // sortNotActiveObj = sortObjectByTimeKeys(sortNotActiveObj);
         // console.log('Object.keys(globalData.localStorage.store).join()')
         // console.log(Object.keys(sortActiveObj).join('\n'))
         // console.log(Object.keys(sortNotActiveObj).join('\n'))
@@ -241,19 +241,6 @@ Page({
 
         const sB = {...Styles.TIMER_BTN};
         marginTopItems += 1;
-        hmUI.createWidget(hmUI.widget.BUTTON, {
-            ...sB,
-            h: TIMER_BTN.h,
-            w: DEVICE_WIDTH / 2,
-            x: DEVICE_WIDTH / 4,
-            text: '+TIMER',
-            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
-            click_func: function () {
-                selectTimeVc = selectTime(true)
-                setScrollLock({lock: true})
-            },
-        });
-        marginTopItems += 1;
 
         hmUI.createWidget(hmUI.widget.BUTTON, {
             ...sB,
@@ -262,19 +249,38 @@ Page({
             text_size: 42,
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
-                selectTimeVc = selectTime(false)
+                selectTimeVc = selectTime(false).vc
+                // selectTimeVcP = selectTime(false).pickerWidget
+                // selectTimeVcP.addEventListener(hmUI.event.CLICK_DOWN, function (info) {
+                //     //Registering event listeners.
+                //     console.log(info.x)
+                // })
+
                 setScrollLock({lock: true})
             },
         });
         marginTopItems += 1;
 
-        hmUI.createWidget(hmUI.widget.TEXT, {
-            x: DEVICE_WIDTH / 3,
-            h: 40,
-            text: '',
-            text_size: 22,
+        hmUI.createWidget(hmUI.widget.BUTTON, {
+            ...sB,
+            h: TIMER_BTN.h,
+            w: DEVICE_WIDTH / 2,
+            x: DEVICE_WIDTH / 4,
+            text: '+TIMER',
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+            click_func: function () {
+                selectTimeVc = selectTime(true).vc
+                setScrollLock({lock: true})
+            },
         });
+        // marginTopItems += 1;
+        // hmUI.createWidget(hmUI.widget.TEXT, {
+        //     x: DEVICE_WIDTH / 3,
+        //     h: 0,
+        //     text: '',
+        //     text_size: 22,
+        //     y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+        // });
 
         // Show scrollbar
         hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {});

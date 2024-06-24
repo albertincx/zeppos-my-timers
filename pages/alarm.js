@@ -249,7 +249,7 @@ Page({
             text_size: 42,
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
-                selectTimeVc = selectTime(false).vc
+                selectTimeVc = selectTime(false)
                 // selectTimeVcP = selectTime(false).pickerWidget
                 // selectTimeVcP.addEventListener(hmUI.event.CLICK_DOWN, function (info) {
                 //     //Registering event listeners.
@@ -269,7 +269,7 @@ Page({
             text: '+TIMER',
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
-                selectTimeVc = selectTime(true).vc
+                selectTimeVc = selectTime(true)
                 setScrollLock({lock: true})
             },
         });

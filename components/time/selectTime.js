@@ -11,7 +11,6 @@ import {
 import * as alarmMgr from "@zos/alarm";
 
 import {replace} from "@zos/router";
-// import {showToast} from "@zos/interaction";
 
 import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, HOME_TARGET} from "../../config/constants";
 
@@ -57,28 +56,28 @@ export function setupAlarm(dTime, timer = false) {
             id = -1
         } else {
             if (!timer && exists) {
-                //
+                // skip exists countdown
             } else {
                 id = alarmMgr.set(alarmObj);
             }
         }
         if (id === 0) {
             // cant setup
-            console.log('cant setup id');
-            console.log(id);
+            console.log('cant setup id, something wrong');
         } else {
-            // save w Time
             if (timer) {
                 if (isCreateTimer && exists) {
                     paramVal = '';
                 }
-            } else {
-                if (exists) paramVal = '';
+            } else if (exists) {
+                paramVal = '';
             }
-            if (isStartTimer || (!timer && !exists)) {
-                paramVal = clearParam(paramVal) + `_=${id}=`;
-            }
+
+            // save to localStorage
             if (paramVal) {
+                if (isStartTimer || (!timer && !exists)) {
+                    paramVal = clearParam(paramVal) + `_=${id}=`;
+                }
                 globalData.localStorage.setItem(STORE_KEY, paramVal);
             }
 
@@ -127,36 +126,23 @@ const timePickerCb = (timer = false, vc) => (picker, event_type, column, value_i
                 break;
         }
     } else if (event_type === 2) {
-        // let s;
         // done
-        if (!changedHour) {
-            dTime.setHours(0);
+        if (timer) {
+            if (!changedHour) dTime.setHours(0);
+            if (!changedMin) dTime.setMinutes(5);
         } else {
-            if (!timer) {
-                dTime.setHours(showTime.getHours() - oldDate.getHours());
-            }
-        }
-
-        if (!changedMin) {
-            if (timer) {
-                dTime.setMinutes(5);
-            } else {
-                dTime.setMinutes((showTime.getMinutes()) - oldDate.getMinutes());
-            }
-        } else {
-            if (!timer) {
-                dTime.setMinutes(showTime.getMinutes() - oldDate.getMinutes());
-            }
+            dTime.setMinutes(showTime.getMinutes() - oldDate.getMinutes());
+            dTime.setHours(showTime.getHours() - oldDate.getHours());
         }
 
         if (!changedSec) dTime.setSeconds(0);
 
-        // showToast({content: `${JSON.stringify(dTime)}`});
         setupAlarm(dTime, timer);
         hideDialog(vc);
 
         changedHour = undefined
         changedMin = undefined
+        changedSec = undefined
     }
 } // end timePickerCb
 
@@ -170,10 +156,13 @@ export function selectTime(timer = false) {
     });
     // just show time
     showTime = getCurrentTime()
+    dateTime = new Date();
+
     showTime.setMinutes(showTime.getMinutes() + 5);
+
     const h = !timer ? showTime.getHours() : 0
     const m = !timer ? showTime.getMinutes() : 5
-    dateTime = new Date();
+
     changedHour = false;
     changedMin = false;
     changedSec = false;

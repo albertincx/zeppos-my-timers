@@ -96,8 +96,8 @@ export function putLiveTime(name = 'main', vc = hmUI, x, y, click_func) {
                 y: y || 40,
                 w: tW,
                 text_size: txtSize,
-                press_color: 0xFF343934,
-                normal_color: 0xFF343934,
+                press_color: isCountDown ? 0x409EFF : 0xFF343934,
+                normal_color: isCountDown ? 0x409EFF : 0xFF343934,
                 text,
                 click_func,
             });

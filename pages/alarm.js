@@ -23,7 +23,7 @@ import {selectTime, setupAlarm} from "../components/time/selectTime";
 import {ALARM_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
 
 const {DEVICE_WIDTH, BUTTON_Y, TIMER_BTN} = Styles;
-//✓
+
 let selectTimeVc = null;
 
 const globalData = getApp()._options.globalData;
@@ -56,6 +56,8 @@ Page({
             const activeId = getActiveId(v);
             if (activeId) {
                 if (activeAlarms.includes(activeId)) return activeId;
+
+                // remove expired countdown
                 if (k.match(COUNTDOWN_KEY)) {
                     globalData.localStorage.removeItem(k);
                     return -1;
@@ -70,11 +72,6 @@ Page({
         let sortActiveObj = getSortedObj(active);
         let sortNotActiveObj = getSortedObj(notActive);
         sortActiveObj = sortObjectByTimeKeys(sortActiveObj);
-        // sortNotActiveObj = sortObjectByTimeKeys(sortNotActiveObj);
-        // console.log('Object.keys(globalData.localStorage.store).join()')
-        // console.log(Object.keys(sortActiveObj).join('\n'))
-        // console.log(Object.keys(sortNotActiveObj).join('\n'))
-        // showToast({content: `${Object.keys(sortNotActiveObj).join('\n')}`})
 
         function listAlarms(alarms, fromLs = false, iiParam = 0) {
             if (alarms.length === 0) return 0
@@ -92,8 +89,6 @@ Page({
 
                 if (!fromLs && !storeVal) {
                     storeVal = globalData.localStorage.getItem(`${COUNTDOWN_KEY}${alarmNumOrKey}`)
-                    console.log('storeVal 1');
-                    console.log(storeVal);
                 }
                 let timeRaw = storeVal;
                 let activeId = getActiveId(storeVal)
@@ -131,7 +126,7 @@ Page({
                     const click_func = () => {
                         if (fromLs) {
                             if (!activeId) {
-                                // start from store
+                                // start saved timer
                                 setupAlarm(dateFromStr, alarmNumOrKey);
                             }
                             return;
@@ -192,7 +187,6 @@ Page({
                         activeId && hmUI.createWidget(hmUI.widget.BUTTON, {
                             ...TIMER_BTN,
                             ...Styles.EDIT_BTN,
-                            // h: TIMER_BTN.h / 2 - 5,
                             h: !isCountDown ? TIMER_BTN.h / 2 - 5 : TIMER_BTN.h,
                             x: DEVICE_WIDTH / 2 + leftMini,
                             y: BUTTON_Y + Styles.BUTTON_LIST * ii + offsetEdit,
@@ -218,28 +212,21 @@ Page({
         let marginTopItems = 0;
         let savedActiveAlarms = getSortedKeys(sortActiveObj);
         let savedNotActiveAlarms = getSortedKeys(sortNotActiveObj);
-        // showToast({content: `${Object.keys(savedNotActiveAlarms).join('\n')}`})
-        // showToast({content: `${savedNotActiveAlarms.join('\n')}`})
 
-        // show stored
+        // render saved active timers or countdowns
         marginTopItems = listAlarms(savedActiveAlarms, true, marginTopItems);
+
+        // render saved not active timers or countdowns
         const marginTopItemsNA = listAlarms(savedNotActiveAlarms, true, marginTopItems);
-        if (marginTopItemsNA) {
-            marginTopItems = marginTopItemsNA;
-        }
+        if (marginTopItemsNA) marginTopItems = marginTopItemsNA;
 
-        // active alarms
-        let marginTopItemsA = listAlarms(
-            activeAlarms,
-            false,
-            marginTopItems
-        );
+        // render active alarms
+        let marginTopItemsA = listAlarms(activeAlarms, false, marginTopItems);
 
-        if (marginTopItemsA) {
-            marginTopItems = marginTopItemsA;
-        }
+        if (marginTopItemsA) marginTopItems = marginTopItemsA;
 
         const sB = {...Styles.TIMER_BTN};
+
         marginTopItems += 1;
 
         hmUI.createWidget(hmUI.widget.BUTTON, {
@@ -250,15 +237,10 @@ Page({
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
                 selectTimeVc = selectTime(false)
-                // selectTimeVcP = selectTime(false).pickerWidget
-                // selectTimeVcP.addEventListener(hmUI.event.CLICK_DOWN, function (info) {
-                //     //Registering event listeners.
-                //     console.log(info.x)
-                // })
-
                 setScrollLock({lock: true})
             },
         });
+
         marginTopItems += 1;
 
         hmUI.createWidget(hmUI.widget.BUTTON, {
@@ -273,15 +255,6 @@ Page({
                 setScrollLock({lock: true})
             },
         });
-        // marginTopItems += 1;
-        // hmUI.createWidget(hmUI.widget.TEXT, {
-        //     x: DEVICE_WIDTH / 3,
-        //     h: 0,
-        //     text: '',
-        //     text_size: 22,
-        //     y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
-        // });
-
         // Show scrollbar
         hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {});
     },

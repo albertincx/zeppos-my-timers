@@ -5,8 +5,8 @@
     "appName": "My Timers",
     "appType": "app",
     "version": {
-      "code": 3,
-      "name": "3.0"
+      "code": 4,
+      "name": "4.0"
     },
     "icon": "iconApp.png",
     "vender": "Albert Safiullin albertincx@gmail.com",

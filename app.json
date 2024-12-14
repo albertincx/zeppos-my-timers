@@ -5,8 +5,8 @@
     "appName": "My Timers",
     "appType": "app",
     "version": {
-      "code": 4,
-      "name": "4.0"
+      "code": 5,
+      "name": "5.0"
     },
     "icon": "iconApp.png",
     "vender": "Albert Safiullin albertincx@gmail.com",
@@ -20,8 +20,8 @@
   ],
   "runtime": {
     "apiVersion": {
-      "compatible": "3.0",
-      "target": "3.0",
+      "compatible": "3.0.0",
+      "target": "3.0.0",
       "minVersion": "3.0"
     }
   },
@@ -39,12 +39,20 @@
       },
       "platforms": [
         {
-          "st": "r"
+          "st": "r",
+          "dw": 480
         }
       ],
       "designWidth": 480
     }
   },
-  "debug": false,
+  "i18n": {
+    "en-US": {
+      "appName": "My Timers"
+    },
+    "ru-RU": {
+      "appName": "Мои таймеры"
+    }
+  },
   "defaultLanguage": "en-US"
 }

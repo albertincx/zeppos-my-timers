@@ -229,26 +229,26 @@ Page({
 
         marginTopItems += 1;
 
-        hmUI.createWidget(hmUI.widget.BUTTON, {
-            ...sB,
-            h: TIMER_BTN.h,
-            text: '+COUNTDOWN',
-            text_size: 42,
-            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
-            click_func: function () {
-                selectTimeVc = selectTime(false)
-                setScrollLock({lock: true})
-            },
-        });
+        // hmUI.createWidget(hmUI.widget.BUTTON, {
+        //     ...sB,
+        //     h: TIMER_BTN.h,
+        //     text: '+COUNTDOWN',
+        //     text_size: 42,
+        //     y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+        //     click_func: function () {
+        //         selectTimeVc = selectTime(false)
+        //         setScrollLock({lock: true})
+        //     },
+        // });
 
-        marginTopItems += 1;
+        // marginTopItems += 1;
 
         hmUI.createWidget(hmUI.widget.BUTTON, {
             ...sB,
             h: TIMER_BTN.h,
             w: DEVICE_WIDTH / 2,
             x: DEVICE_WIDTH / 4,
-            text: '+TIMER',
+            text: '+ Timer',
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
                 selectTimeVc = selectTime(true)

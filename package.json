@@ -4,7 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "zeus build",
+    "dev": "zeus dev"
   },
   "keywords": [
     "zepp",
@@ -17,8 +19,8 @@
     "@zeppos/device-types": "^3.0.0"
   },
   "dependencies": {
-    "@zeppos/zeus-cli": "^1.5.24",
-    "@zeppos/zml": "^0.0.29",
+    "@zeppos/zeus-cli": "^1.7.3",
+    "@zeppos/zml": "^0.0.41",
     "nvm": "^0.0.4",
     "zeppos-app-utils": "^1.0.0",
     "zeus": "^3.3.2"

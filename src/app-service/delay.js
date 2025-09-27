@@ -15,7 +15,7 @@ AppService({
         date.setMinutes(date.getMinutes() + 1);
         const alarm = {
             appid: appId,
-            url: "app-service/index",
+            url: "src/app-service/index",
             date: Math.round(date.getTime() / 1000),
             param: "",
             repeat_type: alarmMgr.ONCE,

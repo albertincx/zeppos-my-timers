@@ -1,4 +1,5 @@
 import hmUI from "@zos/ui";
+import {log} from "@zos/utils";
 import {
     clearParam,
     DEVICE_HEIGHT,
@@ -42,7 +43,9 @@ export function setupAlarm(dTime, timer = false) {
     try {
         const isCreateTimer = timer === true;
         const isStartTimer = typeof timer === 'string';
+
         let name = getTimeStr(dTime);
+        let id;
         alarmObj.time = getAlarmTime(dTime);
         let paramVal = `${timer ? 't_' : 'c_'}${alarmObj.time}${name ? `_${name}` : ''}`;
         alarmObj.param = paramVal;
@@ -51,12 +54,13 @@ export function setupAlarm(dTime, timer = false) {
         if (timer && typeof timer === 'string') STORE_KEY = timer
 
         const exists = globalData.localStorage.getItem(STORE_KEY);
-        let id;
+
         if (isCreateTimer) {
             id = -1
         } else {
             if (!timer && exists) {
                 // skip exists countdown
+                log.log('no skipped')
             } else {
                 id = alarmMgr.set(alarmObj);
             }
@@ -64,28 +68,30 @@ export function setupAlarm(dTime, timer = false) {
         if (id === 0) {
             // cant setup
             console.log('cant setup id, something wrong');
-        } else {
-            if (timer) {
-                if (isCreateTimer && exists) {
-                    paramVal = '';
-                }
-            } else if (exists) {
+            return;
+        }
+
+        if (timer) {
+            if (isCreateTimer && exists) {
                 paramVal = '';
             }
+        } else if (exists) {
+            paramVal = '';
+        }
 
-            // save to localStorage
-            if (paramVal) {
-                if (isStartTimer || (!timer && !exists)) {
-                    paramVal = clearParam(paramVal) + `_=${id}=`;
-                }
-                globalData.localStorage.setItem(STORE_KEY, paramVal);
+        // save to localStorage
+        if (paramVal) {
+            if (isStartTimer || (!timer && !exists)) {
+                paramVal = clearParam(paramVal) + `_=${id}=`;
             }
-
+            globalData.localStorage.setItem(STORE_KEY, paramVal);
+        }
+        setTimeout(() => {
             replace({
                 url: HOME_TARGET,
                 params: 'skip',
             });
-        }
+        }, 50)
     } catch (e) {
         console.log(e);
     }

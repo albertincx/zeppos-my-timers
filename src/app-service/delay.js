@@ -1,24 +1,22 @@
-import {log as Logger} from "@zos/utils";
 import {getPackageInfo} from "@zos/app";
 import * as alarmMgr from "@zos/alarm";
+import {log} from "@zos/utils";
 
-const logger = Logger.getLogger("index-service");
+import {ALARM_TARGET} from "../config/constants";
 
 AppService({
     onInit(params) {
-        logger.log("delay onInit=", params);
         this.delayAlarm(params);
     },
-    delayAlarm() {
+    delayAlarm(params) {
+        log.log('SERVICE params 1', params)
         const {appId} = getPackageInfo();
-        const date = new Date();
-        date.setMinutes(date.getMinutes() + 1);
         const alarm = {
             appid: appId,
-            url: "src/app-service/index",
-            date: Math.round(date.getTime() / 1000),
-            param: "",
-            repeat_type: alarmMgr.ONCE,
+            url: ALARM_TARGET,
+            delay: 3,
+            param: JSON.stringify(params),
+            repeat_type: alarmMgr.REPEAT_ONCE,
             store: true,
         };
         alarmMgr.set(alarm);

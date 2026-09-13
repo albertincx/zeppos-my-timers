@@ -7,11 +7,11 @@ import {replace} from "@zos/router";
 // Добавьте нужные импорты Zepp OS для работы с UI (например, @zos/ui, timer и т.д.)
 const globalData = getApp()._options.globalData;
 Page({
-    // onInit(param) {
-    //     log.log('repeat start', param);
-    //     this.build1(param);
-    // },
-    build(params) {
+    onInit(param) {
+        log.log('repeat start', param);
+        this.invokeRepeat(param);
+    },
+    invokeRepeat(params) {
         // params содержат то, что передали из уведомления, например:
         // JSON.stringify({ action: 'repeat', duration: timerDuration })
         log.log('repeat start 1', params);

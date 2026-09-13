@@ -41,7 +41,6 @@ Page({
                         url: HOME_TARGET,
                         params: 'skip',
                     });
-                    //! in dialog
                     return true;
                 }
             }

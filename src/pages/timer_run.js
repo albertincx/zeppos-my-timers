@@ -24,13 +24,18 @@ Page({
             log.log('Parse params error:', e);
         }
         if (data) {
-            log.log(data);
             let dateTime = data.split('_')[2]
-            dateTime = getTimeFromStr(dateTime);
-            console.log(globalData.localStorage)
+            console.log('data')
+            console.log(data)
+            for (let ii in globalData.localStorage) {
+                console.log(ii, globalData.localStorage.getItem(ii))
+            }
+
             let STORE_KEY = `${ALARM_KEY}${dateTime}`;
-            console.log('dateTime, STORE_KEY')
+            dateTime = getTimeFromStr(dateTime);
+            console.log('dateTime, STORE_KEY 1')
             console.log(dateTime, STORE_KEY)
+
             setupAlarm(dateTime, STORE_KEY);
             setTimeout(() => {
                 exit();

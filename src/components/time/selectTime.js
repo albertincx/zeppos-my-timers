@@ -1,5 +1,8 @@
 import hmUI from "@zos/ui";
 import {log} from "@zos/utils";
+import * as alarmMgr from "@zos/alarm";
+import {replace} from "@zos/router";
+
 import {
     clearParam,
     DEVICE_HEIGHT,
@@ -9,23 +12,17 @@ import {
     getTimeStr,
     showTimeVal
 } from "../../utils/utils";
-import * as alarmMgr from "@zos/alarm";
-
-import {replace} from "@zos/router";
 
 import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, HOME_TARGET} from "../../config/constants";
 
-let dateTime = new Date();
-// visible time
-let showTime;
-// old time for countDown
-let oldDate;
 const globalData = getApp()._options.globalData;
 
+let showTime;
+let oldDate;
 let changedHour;
 let changedMin;
 let changedSec;
-
+let dateTime = new Date();
 let alarmObj = {
     url: ALARM_TARGET,
     store: true,
@@ -37,16 +34,16 @@ let alarmObj = {
     end_time: 0,
 };
 
-export function setupAlarm(dTime, timer = false) {
-    if (!dTime) return;
+export function setupAlarm(alarmTime, timer = false) {
+    if (!alarmTime) return;
 
     try {
         const isCreateTimer = timer === true;
         const isStartTimer = typeof timer === 'string';
 
-        let name = getTimeStr(dTime);
+        let name = getTimeStr(alarmTime);
         let id;
-        alarmObj.time = getAlarmTime(dTime);
+        alarmObj.time = getAlarmTime(alarmTime);
         let paramVal = `${timer ? 't_' : 'c_'}${alarmObj.time}${name ? `_${name}` : ''}`;
         alarmObj.param = paramVal;
 
@@ -86,12 +83,6 @@ export function setupAlarm(dTime, timer = false) {
             }
             globalData.localStorage.setItem(STORE_KEY, paramVal);
         }
-        setTimeout(() => {
-            replace({
-                url: HOME_TARGET,
-                params: 'skip',
-            });
-        }, 50)
     } catch (e) {
         console.log(e);
     }
@@ -149,6 +140,12 @@ const timePickerCb = (timer = false, vc) => (picker, event_type, column, value_i
         changedHour = undefined
         changedMin = undefined
         changedSec = undefined
+        setTimeout(() => {
+            replace({
+                url: HOME_TARGET,
+                params: 'skip',
+            });
+        }, 50)
     }
 } // end timePickerCb
 

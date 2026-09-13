@@ -1,8 +1,10 @@
 import {Time} from "@zos/sensor";
 import {getDeviceInfo} from "@zos/device";
+
 import {ACTIVE_REGEXP, ALARM_KEY, CLEAR_KEY, COUNTDOWN_KEY} from "../config/constants";
 
 const timeSensor = new Time();
+
 export const {height: DEVICE_HEIGHT, width: DEVICE_WIDTH} = getDeviceInfo();
 
 export const showTimeVal = (v) => v >= 10 ? v : '0' + v

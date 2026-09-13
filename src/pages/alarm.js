@@ -23,10 +23,10 @@ import {selectTime, setupAlarm} from "../components/time/selectTime";
 import {ALARM_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
 
 const {DEVICE_WIDTH, BUTTON_Y, TIMER_BTN} = Styles;
+const globalData = getApp()._options.globalData;
 
 let selectTimeVc = null;
 
-const globalData = getApp()._options.globalData;
 Page({
     state: {
         activeIds: [],
@@ -127,6 +127,12 @@ Page({
                             if (!activeId) {
                                 // start saved timer
                                 setupAlarm(dateFromStr, alarmNumOrKey);
+                                setTimeout(() => {
+                                    replace({
+                                        url: HOME_TARGET,
+                                        params: 'skip',
+                                    });
+                                }, 50)
                             }
                             return;
                         }

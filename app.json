@@ -5,14 +5,15 @@
     "appName": "My Timers",
     "appType": "app",
     "version": {
-      "code": 5,
-      "name": "5.0"
+      "code": 6,
+      "name": "6.0"
     },
     "icon": "iconApp.png",
     "vender": "Albert Safiullin albertincx@gmail.com",
     "description": "An app creates timers with alarm"
   },
   "permissions": [
+    "device:os.bg_service",
     "device:os.notification",
     "data:os.device.info",
     "device:os.alarm",
@@ -20,8 +21,8 @@
   ],
   "runtime": {
     "apiVersion": {
-      "compatible": "3.0.0",
-      "target": "3.0.0",
+      "compatible": "3.0",
+      "target": "3.0",
       "minVersion": "3.0"
     }
   },
@@ -55,5 +56,6 @@
       "appName": "Мои таймеры"
     }
   },
+  "debug": false,
   "defaultLanguage": "en-US"
 }

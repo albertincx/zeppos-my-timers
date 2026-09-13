@@ -30,7 +30,8 @@
       "module": {
         "page": {
           "pages": [
-            "src/pages/alarm"
+            "src/pages/alarm",
+            "src/pages/timer_run"
           ]
         },
         "app-service": {

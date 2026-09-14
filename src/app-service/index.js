@@ -1,20 +1,22 @@
 import * as notificationMgr from "@zos/notification";
 
-import {HOME_TARGET, REPEAT_TARGET} from "../config/constants";
+import {HOME_TARGET, REPEAT_TARGET, TIMER_PREFIX} from "../config/constants";
+import {formatHumanTime} from "../utils/utils";
+import {log} from "@zos/utils";
 
 AppService({
     onInit(param) {
         this.invokeNotification(param);
     },
     invokeNotification(param) {
-        console.log('param alarm notify', param)
+        log.log('param alarm notify', param)
         notificationMgr.notify({
-            title: "My Timer",
-            content: "Its time ..",
-            vibrate: 6,
+            title: `${formatHumanTime(param, param.startsWith(TIMER_PREFIX))}`,
+            content: "Its time, Repeat?",
+            vibrate: 4,
             actions: [
                 {
-                    text: "Go to timers",
+                    text: "Go to App",
                     file: HOME_TARGET,
                     param: 'skip',
                 },

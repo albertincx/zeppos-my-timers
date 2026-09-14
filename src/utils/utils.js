@@ -7,10 +7,10 @@ const timeSensor = new Time();
 
 export const {height: DEVICE_HEIGHT, width: DEVICE_WIDTH} = getDeviceInfo();
 
-export const showTimeVal = (v) => v >= 10 ? v : '0' + v
+export const addZeroToVal = (v) => v >= 10 ? v : '0' + v
 
 export const getTimeStr = (timeObj) => {
-    return `${showTimeVal(timeObj.getHours())}:${showTimeVal(timeObj.getMinutes())}:${showTimeVal(timeObj.getSeconds())}`
+    return `${addZeroToVal(timeObj.getHours())}:${addZeroToVal(timeObj.getMinutes())}:${addZeroToVal(timeObj.getSeconds())}`
 }
 
 export const getTimerStr = (v, end = '') => {
@@ -37,9 +37,9 @@ export const showHumanTimeStr = (timeObj, endStr = false) => {
     let h = timeObj.getHours();
     let m = timeObj.getMinutes();
     let s = timeObj.getSeconds();
-    let hs = showTimeVal(h);
-    let ms = showTimeVal(m);
-    let ss = showTimeVal(s);
+    let hs = addZeroToVal(h);
+    let ms = addZeroToVal(m);
+    let ss = addZeroToVal(s);
     let sepH = ':';
     let sepM = ':';
     let endS = '';
@@ -181,3 +181,18 @@ export const getSortedObj = (obj) => {
     }
     return sortObj
 }
+
+export const formatHumanTime = (timeStr, isTimer = false) => {
+    const parts = timeStr.split(':').map(Number);
+    const h = parts[0] || 0;
+    const m = parts[1] || 0;
+    const s = parts[2] || 0;
+
+    let res = [];
+    if (h > 0) res.push(`${h}h`);
+    if (m > 0) res.push(`${m}min`);
+    if (s > 0 || (h === 0 && m === 0)) res.push(`${s}sec`);
+
+    let text = res.join(' ');
+    return isTimer ? `${text} timer` : `${text} countdown`;
+};

@@ -4,20 +4,19 @@ import * as alarmMgr from "@zos/alarm";
 import {replace} from "@zos/router";
 
 import {
+    addZeroToVal,
     clearParam,
     DEVICE_HEIGHT,
     DEVICE_WIDTH,
     getAlarmTime,
     getCurrentTime,
-    getTimeStr,
-    showTimeVal
+    getTimeStr
 } from "../../utils/utils";
 
-import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, HOME_TARGET} from "../../config/constants";
+import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, DEF_CNT_MIN, DEF_TIMER_MIN, HOME_TARGET} from "../../config/constants";
 
 const globalData = getApp()._options.globalData;
 
-let showTime;
 let oldDate;
 let changedHour;
 let changedMin;
@@ -42,11 +41,16 @@ export function setupAlarm(alarmTime, timer = false) {
         const isStartTimer = typeof timer === 'string';
 
         let name = getTimeStr(alarmTime);
+        if (name === "00:00:00") {
+            // cant setup
+            log.log('cant setup, zeroes');
+            return;
+        }
         let id;
         alarmObj.time = getAlarmTime(alarmTime);
         let paramVal = `${timer ? 't_' : 'c_'}${alarmObj.time}${name ? `_${name}` : ''}`;
         alarmObj.param = paramVal;
-
+        log.log('alarmTime1 = ', alarmTime, name)
         let STORE_KEY = `${timer ? ALARM_KEY : COUNTDOWN_KEY}${name}`;
         if (timer && typeof timer === 'string') STORE_KEY = timer
 
@@ -64,7 +68,7 @@ export function setupAlarm(alarmTime, timer = false) {
         }
         if (id === 0) {
             // cant setup
-            console.log('cant setup id, something wrong');
+            log.log('cant setup id, something wrong');
             return;
         }
 
@@ -84,7 +88,7 @@ export function setupAlarm(alarmTime, timer = false) {
             globalData.localStorage.setItem(STORE_KEY, paramVal);
         }
     } catch (e) {
-        console.log(e);
+        log.log(`error ${e}`);
     }
 }
 
@@ -93,7 +97,7 @@ function hideDialog(vc) {
     hmUI.redraw();
 }
 
-const timePickerCb = (timer = false, vc) => (picker, event_type, column, value_index) => {
+const timePickerCb = (isTimer = false, vc) => (picker, event_type, column, value_index) => {
     const dTime = dateTime;
 
     oldDate = getCurrentTime();
@@ -102,19 +106,11 @@ const timePickerCb = (timer = false, vc) => (picker, event_type, column, value_i
         // update
         switch (column) {
             case 0: // hour
-                if (!timer) {
-                    showTime.setHours(value_index);
-                } else {
-                    dTime.setHours(value_index);
-                }
+                dTime.setHours(value_index);
                 changedHour = true;
                 break;
             case 1: // minute
-                if (!timer) {
-                    showTime.setMinutes(value_index);
-                } else {
-                    dTime.setMinutes(value_index);
-                }
+                dTime.setMinutes(value_index);
                 changedMin = true;
                 break;
             case 2: // second
@@ -123,23 +119,18 @@ const timePickerCb = (timer = false, vc) => (picker, event_type, column, value_i
                 break;
         }
     } else if (event_type === 2) {
-        // done
-        if (timer) {
-            if (!changedHour) dTime.setHours(0);
-            if (!changedMin) dTime.setMinutes(5);
-        } else {
-            dTime.setMinutes(showTime.getMinutes() - oldDate.getMinutes());
-            dTime.setHours(showTime.getHours() - oldDate.getHours());
-        }
-
+        // OK clicked
+        if (!changedHour) dTime.setHours(0);
+        if (!changedMin) dTime.setMinutes(isTimer ? DEF_TIMER_MIN : DEF_CNT_MIN);
         if (!changedSec) dTime.setSeconds(0);
 
-        setupAlarm(dTime, timer);
+        setupAlarm(dTime, isTimer);
         hideDialog(vc);
 
         changedHour = undefined
         changedMin = undefined
         changedSec = undefined
+
         setTimeout(() => {
             replace({
                 url: HOME_TARGET,
@@ -147,9 +138,9 @@ const timePickerCb = (timer = false, vc) => (picker, event_type, column, value_i
             });
         }, 50)
     }
-} // end timePickerCb
+}
 
-export function selectTime(timer = false) {
+export function selectTime(isTimer = false) {
     let vc = hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
         x: 0,
         y: 0,
@@ -157,43 +148,41 @@ export function selectTime(timer = false) {
         h: DEVICE_HEIGHT,
         scroll_enable: 0,
     });
-    // just show time
-    showTime = getCurrentTime()
     dateTime = new Date();
 
-    showTime.setMinutes(showTime.getMinutes() + 5);
+    const isCountdown = !isTimer
 
-    const h = !timer ? showTime.getHours() : 0
-    const m = !timer ? showTime.getMinutes() : 5
+    const h = 0
+    const m = isCountdown ? DEF_CNT_MIN : DEF_TIMER_MIN
 
     changedHour = false;
     changedMin = false;
     changedSec = false;
 
     vc.createWidget(hmUI.widget.WIDGET_PICKER, {
-        title: timer ? 'Create timer' : 'CountDown',
-        nb_of_columns: timer ? 3 : 2,
+        title: isTimer ? 'Create timer' : 'CountDown',
+        nb_of_columns: 3,
         data_config: [
             {
                 data_array: new Array(24)
-                    .fill(0).map((d, index) => `${showTimeVal(index)}h`),
+                    .fill(0).map((d, index) => `${addZeroToVal(index)}h`),
                 init_val_index: h,
                 unit: 'Hour',
                 support_loop: true,
             },
             {
                 data_array: new Array(60)
-                    .fill(0).map((d, index) => `${showTimeVal(index)}m`),
+                    .fill(0).map((d, index) => `${addZeroToVal(index)}m`),
                 init_val_index: m,
                 unit: 'Min',
             },
             {
-                data_array: new Array(60).fill(0).map((d, index) => `${showTimeVal(index)}s`),
+                data_array: new Array(60).fill(0).map((d, index) => `${addZeroToVal(index)}s`),
                 init_val_index: 0,
                 unit: 'Sec',
             },
         ],
-        picker_cb: timePickerCb(timer, vc),
+        picker_cb: timePickerCb(isTimer, vc),
     });
 
     return vc;

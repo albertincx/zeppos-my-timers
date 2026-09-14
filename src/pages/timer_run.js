@@ -2,7 +2,7 @@ import {log} from "@zos/utils";
 import {exit} from "@zos/router";
 
 import {getTimeFromStr} from "../utils/utils";
-import {ALARM_KEY} from "../config/constants";
+import {ALARM_KEY, COUNTDOWN_KEY} from "../config/constants";
 
 import {setupAlarm} from "../components/time/selectTime";
 
@@ -25,16 +25,14 @@ Page({
         }
         if (data) {
             let dateTime = data.split('_')[2]
-            console.log('data')
-            console.log(data)
-            for (let ii in globalData.localStorage) {
-                console.log(ii, globalData.localStorage.getItem(ii))
-            }
+            // for (let ii in globalData.localStorage) {
+            //     console.log(ii, globalData.localStorage.getItem(ii))
+            // }
 
-            let STORE_KEY = `${ALARM_KEY}${dateTime}`;
+            let STORE_KEY = `${params.startsWith('c_') ? COUNTDOWN_KEY : ALARM_KEY}`;
+            STORE_KEY += `${dateTime}`
             dateTime = getTimeFromStr(dateTime);
-            console.log('dateTime, STORE_KEY 1')
-            console.log(dateTime, STORE_KEY)
+            log.log(`dateTime, STORE_KEY 1 ${dateTime}`, STORE_KEY)
 
             setupAlarm(dateTime, STORE_KEY);
             setTimeout(() => {

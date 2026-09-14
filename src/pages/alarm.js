@@ -66,7 +66,6 @@ Page({
         const {active, notActive} = splitObjectByValue(
             globalData.localStorage.store,
             conditionFunction,
-            activeAlarms
         );
         let sortActiveObj = getSortedObj(active);
         let sortNotActiveObj = getSortedObj(notActive);
@@ -206,7 +205,7 @@ Page({
                         });
                     }
                 } catch (e) {
-                    console.log(e);
+                    log.log(`err2 ${e}`);
                 }
             });
 
@@ -234,20 +233,6 @@ Page({
 
         marginTopItems += 1;
 
-        // hmUI.createWidget(hmUI.widget.BUTTON, {
-        //     ...sB,
-        //     h: TIMER_BTN.h,
-        //     text: '+COUNTDOWN',
-        //     text_size: 42,
-        //     y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
-        //     click_func: function () {
-        //         selectTimeVc = selectTime(false)
-        //         setScrollLock({lock: true})
-        //     },
-        // });
-
-        // marginTopItems += 1;
-
         hmUI.createWidget(hmUI.widget.BUTTON, {
             ...sB,
             h: TIMER_BTN.h,
@@ -260,6 +245,21 @@ Page({
                 setScrollLock({lock: true})
             },
         });
+
+        marginTopItems += 1;
+
+        hmUI.createWidget(hmUI.widget.BUTTON, {
+            ...sB,
+            h: TIMER_BTN.h,
+            text: '+COUNTDOWN',
+            text_size: 42,
+            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+            click_func: function () {
+                selectTimeVc = selectTime(false)
+                setScrollLock({lock: true})
+            },
+        });
+
         // Show scrollbar
         hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {});
     },

@@ -13,7 +13,7 @@ AppService({
         notificationMgr.notify({
             title: `${formatHumanTime(param, param.startsWith(TIMER_PREFIX))}`,
             content: "Its time, Repeat?",
-            vibrate: 4,
+            vibrate: 6,
             actions: [
                 {
                     text: "Go to App",

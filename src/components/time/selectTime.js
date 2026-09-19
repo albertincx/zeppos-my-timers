@@ -1,7 +1,6 @@
 import hmUI from "@zos/ui";
 import {log} from "@zos/utils";
 import * as alarmMgr from "@zos/alarm";
-import {replace} from "@zos/router";
 
 import {
     addZeroToVal,
@@ -10,10 +9,11 @@ import {
     DEVICE_WIDTH,
     getAlarmTime,
     getSensorTime,
-    getTimeStr
+    getTimeStr,
+    goHome
 } from "../../utils/utils";
 
-import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, DEF_CNT_MIN, DEF_TIMER_MIN, HOME_TARGET} from "../../config/constants";
+import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, DEF_CNT_MIN, DEF_TIMER_MIN} from "../../config/constants";
 
 const globalData = getApp()._options.globalData;
 
@@ -132,10 +132,7 @@ const timePickerCb = (isTimer = false, vc) => (picker, event_type, column, value
         changedSec = undefined
 
         setTimeout(() => {
-            replace({
-                url: HOME_TARGET,
-                params: 'skip',
-            });
+            goHome()
         }, 50)
     }
 }

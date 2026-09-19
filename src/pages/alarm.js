@@ -3,9 +3,9 @@ import hmUI from "@zos/ui";
 import {replace} from "@zos/router";
 import * as alarmMgr from "@zos/alarm";
 import {getText} from "@zos/i18n";
+import {showToast} from "@zos/interaction";
 
 import {setScrollLock} from '@zos/page'
-import {GESTURE_RIGHT, onGesture} from "@zos/interaction";
 
 import * as Styles from "zosLoader:./style.[pf].layout.js";
 
@@ -18,13 +18,15 @@ import {
     getSortedObj,
     getTimeFromStr,
     getTT,
+    goHome,
+    initSwipeBack,
     showHumanTimerStr,
     showHumanTimeStr,
     sortObjectByTimeKeys,
     splitObjectByValue
 } from "../utils/utils";
 import {selectTime, setupAlarm} from "../components/time/selectTime";
-import {ABOUT_TARGET, ALARM_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
+import {ABOUT_TARGET, ALARM_KEY, COUNTDOWN_KEY} from "../config/constants";
 
 const {DEVICE_WIDTH, BUTTON_Y, TIMER_BTN} = Styles;
 const globalData = getApp()._options.globalData;
@@ -50,18 +52,7 @@ Page({
 
         globalTimer = setInterval(runScheduledTask, 1000);
 
-        onGesture(function (event) {
-            if (event === GESTURE_RIGHT) {
-                if (selectTimeVc) {
-                    replace({
-                        url: HOME_TARGET,
-                        params: 'skip',
-                    });
-                    return true;
-                }
-            }
-            return false;
-        });
+        initSwipeBack(() => selectTimeVc);
     },
     build() {
         let mcb = putLiveTime('main');
@@ -88,7 +79,6 @@ Page({
         let sortActiveObj = getSortedObj(active);
         let sortNotActiveObj = getSortedObj(notActive);
         sortActiveObj = sortObjectByTimeKeys(sortActiveObj);
-
         function listAlarms(alarms, fromLs = false, iiParam = 0) {
             if (alarms.length === 0) return 0
 
@@ -145,21 +135,19 @@ Page({
                                 // start saved timer
                                 setupAlarm(dateFromStr, alarmNumOrKey);
                                 setTimeout(() => {
-                                    replace({
-                                        url: HOME_TARGET,
-                                        params: 'skip',
-                                    });
+                                    goHome()
                                 }, 50)
+                            } else {
+                                showToast({
+                                    content: `${showHumanTimerStr(name)}${isCountDown ? ' countdown' : ' timer'}`
+                                })
                             }
+                            log.debug('from ls')
                             return;
                         }
 
                         alarmMgr.cancel(activeId || alarmNumOrKey);
-
-                        replace({
-                            url: HOME_TARGET,
-                            params: 'skip',
-                        });
+                        goHome()
                     };
 
                     if (activeId) {
@@ -194,20 +182,16 @@ Page({
                             y: BUTTON_Y + Styles.BUTTON_LIST * ii + 5,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
-                                showConfirm(
-                                    getText('Delete?'),
-                                    () => {
+                                showConfirm({
+                                    message: getText('Delete?'),
+                                    onConfirm: () => {
+                                        let deleteAlarm = activeId || alarmNumOrKey;
                                         globalData.localStorage.removeItem(alarmNumOrKey);
                                         if (deleteAlarm) alarmMgr.cancel(deleteAlarm);
-                                        replace({
-                                            url: HOME_TARGET,
-                                            params: 'skip',
-                                        });
+                                        goHome()
                                     },
-                                    () => {
-                                        log.debug("Отменено");
-                                    }
-                                );
+                                    icon: "🗑️ ",
+                                });
                             },
                         });
                         let offsetEdit = TIMER_BTN.h / 2 + 10;
@@ -220,19 +204,14 @@ Page({
                             y: BUTTON_Y + Styles.BUTTON_LIST * ii + offsetEdit,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
-                                showConfirm(
-                                    getText('Stop?'),
-                                    () => {
+                                showConfirm({
+                                    message: getText('Stop?'),
+                                    onConfirm: () => {
                                         alarmMgr.cancel(activeId);
-                                        replace({
-                                            url: HOME_TARGET,
-                                            params: 'skip',
-                                        });
+                                        goHome()
                                     },
-                                    () => {
-                                        log.debug("calcel");
-                                    }
-                                );
+                                    icon: "⏹️ ",
+                                });
                             },
                         });
                     }

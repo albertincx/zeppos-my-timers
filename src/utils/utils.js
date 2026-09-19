@@ -1,8 +1,10 @@
 import {Time} from "@zos/sensor";
 import {getDeviceInfo} from "@zos/device";
 import {getText} from "@zos/i18n";
+import {replace} from "@zos/router";
+import {GESTURE_RIGHT, onGesture} from "@zos/interaction";
 
-import {ACTIVE_REGEXP, ALARM_KEY, CLEAR_KEY, COUNTDOWN_KEY} from "../config/constants";
+import {ACTIVE_REGEXP, ALARM_KEY, CLEAR_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
 
 const timeSensor = new Time();
 
@@ -54,7 +56,7 @@ export const showHumanTimeStr = (timeObj, endStr = false) => {
         endS = 's '
     }
     if (!h) hs = sepH = '';
-    if (!m) ms = sepM = '';
+    if (!m && !h) ms = sepM = '';
     if (!s && !endS) {
         ss = sepM = '';
     }
@@ -159,6 +161,29 @@ export const getSortedKeys = (sortObj) => {
     return savedAlarms;
 }
 
+/**
+ * Вычисляет общую длину времени в секундах из строки вида "00:05:00" или ключа с префиксом
+ * @param {string} str - Строка, содержащая время (например, "alarmId00:05:00" или "00:05:00")
+ * @returns {number} Количество секунд
+ */
+export function getTimeLengthInSeconds(str) {
+    if (!str) return 0;
+
+    // Очищаем строку от возможных префиксов (оставляем только формат времени HH:MM:SS)
+    // Либо ищем паттерн времени через регулярное выражение
+    const match = `${str}`.match(/([0-9]{2}:[0-9]{2}:[0-9]{2})/);
+    const timeStr = match ? match[1] : str;
+
+    const parts = timeStr.split(':').map(Number);
+
+    if (parts.length === 3) {
+        const [hours, minutes, seconds] = parts;
+        return (hours * 3600) + (minutes * 60) + seconds;
+    }
+
+    return 0;
+}
+
 export const getSortedObj = (obj) => {
     let sortObj = {};
     const sKeys = Object.keys(obj);
@@ -179,6 +204,21 @@ export const getSortedObj = (obj) => {
     return sortObj
 }
 
+export const initSwipeBack = (customCondition = null) => {
+    onGesture(function (event) {
+        if (event === GESTURE_RIGHT) {
+            // another js magic getter function
+            if (customCondition === -1 || (
+                typeof customCondition === 'function' && customCondition()
+            )) {
+                goHome();
+                return true;
+            }
+        }
+        return false;
+    });
+}
+
 export function formatHumanTime(str, isTimer = false) {
     const [h, m, s] = str.split('_').pop().split(':').map(Number);
     const res = [];
@@ -189,4 +229,33 @@ export function formatHumanTime(str, isTimer = false) {
 
     let text = res.join(' ') || '0sec';
     return isTimer ? `${text} timer` : `${text} countdown`;
+}
+
+export const goHome = () => {
+    replace({
+        url: HOME_TARGET,
+        params: 'skip',
+    });
+}
+
+/**
+ * Сортирует активные элементы по оставшемуся времени (timeLeft) по возрастанию (сначала те, что ближе к концу)
+ */
+export function sortActiveByTimeLeft(obj) {
+    const now = getSensorTime().getTime();
+
+    return Object.keys(obj)
+        .sort((aKey, bKey) => {
+            const timeA = parseInt(aKey) || 0; // Предполагаем, что ключ хранит таймстамп или передается в объекте
+            const timeB = parseInt(bKey) || 0;
+
+            const timeLeftA = timeA * 1000 - now;
+            const timeLeftB = timeB * 1000 - now;
+
+            return timeLeftA - timeLeftB; // Сортировка по возрастанию (меньше времени -> выше в списке)
+        })
+        .reduce((sortedObj, key) => {
+            sortedObj[key] = obj[key];
+            return sortedObj;
+        }, {});
 }

@@ -2,11 +2,15 @@ import {log} from "@zos/utils";
 import hmUI from "@zos/ui";
 import {replace} from "@zos/router";
 import * as alarmMgr from "@zos/alarm";
+import {getText} from "@zos/i18n";
+
 import {setScrollLock} from '@zos/page'
 import {GESTURE_RIGHT, onGesture} from "@zos/interaction";
 
 import * as Styles from "zosLoader:./style.[pf].layout.js";
+
 import {putLiveTime} from "../components/time";
+import {showConfirm} from "../components/showConfirm";
 import {
     clearParam,
     getActiveId,
@@ -20,19 +24,31 @@ import {
     splitObjectByValue
 } from "../utils/utils";
 import {selectTime, setupAlarm} from "../components/time/selectTime";
-import {ALARM_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
+import {ABOUT_TARGET, ALARM_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
 
 const {DEVICE_WIDTH, BUTTON_Y, TIMER_BTN} = Styles;
 const globalData = getApp()._options.globalData;
 
 let selectTimeVc = null;
+let globalTimer = null;
+let updateCallbacks = []; // Массив функций обновления
 
 Page({
     state: {
         activeIds: [],
     },
     onInit(param) {
-        if (param === 'skip') setScrollLock({lock: false});
+        if (param === 'skip') {
+            setScrollLock({lock: false});
+        }
+        // Очищаем массив при инициализации
+        updateCallbacks = [];
+
+        const runScheduledTask = () => {
+            updateCallbacks.forEach(cb => cb());
+        };
+
+        globalTimer = setInterval(runScheduledTask, 1000);
 
         onGesture(function (event) {
             if (event === GESTURE_RIGHT) {
@@ -48,7 +64,9 @@ Page({
         });
     },
     build() {
-        putLiveTime();
+        let mcb = putLiveTime('main');
+        updateCallbacks.push(mcb)
+
         const that = this;
         const activeAlarms = alarmMgr.getAllAlarms();
         const conditionFunction = (k, v) => {
@@ -145,15 +163,16 @@ Page({
                     };
 
                     if (activeId) {
-                        putLiveTime({
-                            alarmTime,
+                        let updActiveTimer = putLiveTime({
+                            alarmTime: alarmTime || alarmNumOrKey,
                             dateFromStr,
                             isCountDown
-                        }, hmUI, 75, BUTTON_Y + Styles.BUTTON_LIST * ii, click_func);
+                        }, 75, BUTTON_Y + Styles.BUTTON_LIST * ii, click_func);
+                        // put for redraw
+                        updateCallbacks.push(updActiveTimer);
                     } else {
-                        let txtSize = timeRaw && timeRaw.length > 10 ? TIMER_BTN.text_size - 18 : TIMER_BTN.text_size;
+                        let txtSize = timeRaw && timeRaw.length >= 10 ? TIMER_BTN.text_size - 10 : TIMER_BTN.text_size;
                         let text = `${fromLs ? '' : 'Alarm '}${activeId ? '' : (timeRaw || alarmNumOrKey)}`;
-
                         hmUI.createWidget(hmUI.widget.BUTTON, {
                             ...TIMER_BTN,
                             text_size: txtSize,
@@ -175,15 +194,20 @@ Page({
                             y: BUTTON_Y + Styles.BUTTON_LIST * ii + 5,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
-                                let deleteAlarm = activeId || alarmNumOrKey;
-                                globalData.localStorage.removeItem(alarmNumOrKey);
-
-                                if (deleteAlarm) alarmMgr.cancel(deleteAlarm)
-
-                                replace({
-                                    url: HOME_TARGET,
-                                    params: 'skip',
-                                });
+                                showConfirm(
+                                    getText('Delete?'),
+                                    () => {
+                                        globalData.localStorage.removeItem(alarmNumOrKey);
+                                        if (deleteAlarm) alarmMgr.cancel(deleteAlarm);
+                                        replace({
+                                            url: HOME_TARGET,
+                                            params: 'skip',
+                                        });
+                                    },
+                                    () => {
+                                        log.debug("Отменено");
+                                    }
+                                );
                             },
                         });
                         let offsetEdit = TIMER_BTN.h / 2 + 10;
@@ -196,16 +220,24 @@ Page({
                             y: BUTTON_Y + Styles.BUTTON_LIST * ii + offsetEdit,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
-                                alarmMgr.cancel(activeId);
-                                replace({
-                                    url: HOME_TARGET,
-                                    params: 'skip',
-                                });
+                                showConfirm(
+                                    getText('Stop?'),
+                                    () => {
+                                        alarmMgr.cancel(activeId);
+                                        replace({
+                                            url: HOME_TARGET,
+                                            params: 'skip',
+                                        });
+                                    },
+                                    () => {
+                                        log.debug("calcel");
+                                    }
+                                );
                             },
                         });
                     }
                 } catch (e) {
-                    log.log(`err2 ${e}`);
+                    log.debug(`err2 ${e}`);
                 }
             });
 
@@ -238,10 +270,12 @@ Page({
             h: TIMER_BTN.h,
             w: DEVICE_WIDTH / 2,
             x: DEVICE_WIDTH / 4,
-            text: '+ Timer',
+            text: '✚' + getText('Timer') + '⏰',
+            text_size: 40,
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
-                selectTimeVc = selectTime(true)
+                let _selectTimeVc = selectTime(true)
+                selectTimeVc = _selectTimeVc.vc
                 setScrollLock({lock: true})
             },
         });
@@ -251,19 +285,48 @@ Page({
         hmUI.createWidget(hmUI.widget.BUTTON, {
             ...sB,
             h: TIMER_BTN.h,
-            text: '+COUNTDOWN',
-            text_size: 42,
+            text: '🚀' + getText('COUNTDOWN') + '⏳',
+            text_size: 40,
+            press_color: 0x409EFF,
+            normal_color: 0x409EFF,
             y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
-                selectTimeVc = selectTime(false)
+                let _selectTimeVc = selectTime(false)
+                selectTimeVc = _selectTimeVc.vc
                 setScrollLock({lock: true})
             },
         });
 
+        marginTopItems += 1;
+
+        hmUI.createWidget(hmUI.widget.BUTTON, {
+            ...sB,
+            x: DEVICE_WIDTH / 2 - 110,
+            w: 230,
+            h: 55,
+            text: 'ℹ️ ' + getText('About'),
+            text_size: 26,
+            radius: 16,
+            press_color: 0x409EFF,
+            normal_color: 0x000000,
+            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+            click_func: function () {
+                replace({
+                    url: ABOUT_TARGET,
+                    params: 'skip',
+                });
+            },
+        });
         // Show scrollbar
         hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {});
     },
     onDestroy() {
-        log.log("page on destroy invoke");
+        log.debug("page on destroy invoke");
+        if (globalTimer) {
+            clearInterval(globalTimer);
+            globalTimer = null;
+            log.debug("timer cleared");
+        }
+        updateCallbacks = [];
     },
 });

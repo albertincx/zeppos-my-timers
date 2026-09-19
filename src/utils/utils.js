@@ -1,5 +1,6 @@
 import {Time} from "@zos/sensor";
 import {getDeviceInfo} from "@zos/device";
+import {getText} from "@zos/i18n";
 
 import {ACTIVE_REGEXP, ALARM_KEY, CLEAR_KEY, COUNTDOWN_KEY} from "../config/constants";
 
@@ -11,6 +12,10 @@ export const addZeroToVal = (v) => v >= 10 ? v : '0' + v
 
 export const getTimeStr = (timeObj) => {
     return `${addZeroToVal(timeObj.getHours())}:${addZeroToVal(timeObj.getMinutes())}:${addZeroToVal(timeObj.getSeconds())}`
+}
+
+export const getTimeStrMain = (timeObj) => {
+    return `${getText('Time')}: ${addZeroToVal(timeObj.getHours())}:${addZeroToVal(timeObj.getMinutes())}:${addZeroToVal(timeObj.getSeconds())}`
 }
 
 export const getTimerStr = (v, end = '') => {
@@ -38,8 +43,8 @@ export const showHumanTimeStr = (timeObj, endStr = false) => {
     let m = timeObj.getMinutes();
     let s = timeObj.getSeconds();
     let hs = addZeroToVal(h);
-    let ms = addZeroToVal(m);
-    let ss = addZeroToVal(s);
+    let ms = h ? addZeroToVal(m) : m;
+    let ss = (h || m) ? addZeroToVal(s) : s;
     let sepH = ':';
     let sepM = ':';
     let endS = '';
@@ -59,7 +64,7 @@ export const showHumanTimeStr = (timeObj, endStr = false) => {
 
 // get time from "00:00:00" string
 export const getTimeFromStr = (name) => {
-    const now = new Date();
+    const now = getSensorTime();
 
     const names = name.replace(ACTIVE_REGEXP, '').split(':');
 
@@ -94,22 +99,14 @@ export const getAlarmTime = (dTime) => {
     return Math.floor(cTime.getTime() / 1000);
 }
 
-export function getCurrentTime() {
-    let cTime = getSensorTime();
-    cTime.setHours(timeSensor.getHours(), timeSensor.getMinutes(), timeSensor.getSeconds())
-
-    return cTime
-}
-
 export function clearParam(s) {
     return `${s}`.replace(new RegExp(ACTIVE_REGEXP, 'g'), '');
 }
 
 export const getActiveId = (val) => {
+    if (typeof val === 'number') val = String(val)
     let activeId = val && val.match(ACTIVE_REGEXP);
-    if (activeId) {
-        return +activeId[2]
-    }
+    if (activeId) return +activeId[2]
 }
 
 export function sortObjectByTimeKeys(obj) {
@@ -182,17 +179,14 @@ export const getSortedObj = (obj) => {
     return sortObj
 }
 
-export const formatHumanTime = (timeStr, isTimer = false) => {
-    const parts = timeStr.split(':').map(Number);
-    const h = parts[0] || 0;
-    const m = parts[1] || 0;
-    const s = parts[2] || 0;
+export function formatHumanTime(str, isTimer = false) {
+    const [h, m, s] = str.split('_').pop().split(':').map(Number);
+    const res = [];
 
-    let res = [];
     if (h > 0) res.push(`${h}h`);
     if (m > 0) res.push(`${m}min`);
-    if (s > 0 || (h === 0 && m === 0)) res.push(`${s}sec`);
+    if (s > 0) res.push(`${s}sec`);
 
-    let text = res.join(' ');
+    let text = res.join(' ') || '0sec';
     return isTimer ? `${text} timer` : `${text} countdown`;
-};
+}

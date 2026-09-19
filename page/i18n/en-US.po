@@ -4,7 +4,6 @@ msgstr "Countdown"
 msgid "Timer"
 msgstr "Timer"
 
-
 msgid "Its time, Repeat?"
 msgstr "Its time, Repeat?"
 
@@ -16,3 +15,24 @@ msgstr "Repeat"
 
 msgid "Finished"
 msgstr "Finished"
+
+msgid "Time"
+msgstr "Time"
+
+msgid "Delete?"
+msgstr "Delete?"
+
+msgid "About"
+msgstr "About"
+
+msgid "Discussion Chat"
+msgstr "Discussion Chat"
+
+msgid "Home"
+msgstr "Back"
+
+msgid "Yes!"
+msgstr "Yes"
+
+msgid "No!"
+msgstr "No"

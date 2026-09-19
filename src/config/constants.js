@@ -1,6 +1,7 @@
 export const ALARM_TARGET = "src/app-service/index";
 export const HOME_TARGET = "src/pages/alarm";
 export const REPEAT_TARGET = "src/pages/timer_run";
+export const ABOUT_TARGET = "src/pages/about";
 
 export const ALARM_KEY = "alarmId";
 export const TIMER_PREFIX = "t_";

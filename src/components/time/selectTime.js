@@ -9,7 +9,7 @@ import {
     DEVICE_HEIGHT,
     DEVICE_WIDTH,
     getAlarmTime,
-    getCurrentTime,
+    getSensorTime,
     getTimeStr
 } from "../../utils/utils";
 
@@ -43,14 +43,14 @@ export function setupAlarm(alarmTime, timer = false) {
         let name = getTimeStr(alarmTime);
         if (name === "00:00:00") {
             // cant setup
-            log.log('cant setup, zeroes');
+            log.debug('cant setup, zeroes');
             return;
         }
         let id;
         alarmObj.time = getAlarmTime(alarmTime);
         let paramVal = `${timer ? 't_' : 'c_'}${alarmObj.time}${name ? `_${name}` : ''}`;
         alarmObj.param = paramVal;
-        log.log('alarmTime1 = ', alarmTime, name)
+        log.debug('\nalarmTime1 = ', alarmTime, name)
         let STORE_KEY = `${timer ? ALARM_KEY : COUNTDOWN_KEY}${name}`;
         if (timer && typeof timer === 'string') STORE_KEY = timer
 
@@ -61,14 +61,14 @@ export function setupAlarm(alarmTime, timer = false) {
         } else {
             if (!timer && exists) {
                 // skip exists countdown
-                log.log('no skipped')
+                log.debug('no skipped')
             } else {
                 id = alarmMgr.set(alarmObj);
             }
         }
         if (id === 0) {
             // cant setup
-            log.log('cant setup id, something wrong');
+            log.debug('cant setup id, something wrong');
             return;
         }
 
@@ -88,7 +88,7 @@ export function setupAlarm(alarmTime, timer = false) {
             globalData.localStorage.setItem(STORE_KEY, paramVal);
         }
     } catch (e) {
-        log.log(`error ${e}`);
+        log.debug(`error ${e}`);
     }
 }
 
@@ -100,7 +100,7 @@ function hideDialog(vc) {
 const timePickerCb = (isTimer = false, vc) => (picker, event_type, column, value_index) => {
     const dTime = dateTime;
 
-    oldDate = getCurrentTime();
+    oldDate = getSensorTime();
 
     if (event_type === 1) {
         // update
@@ -185,5 +185,5 @@ export function selectTime(isTimer = false) {
         picker_cb: timePickerCb(isTimer, vc),
     });
 
-    return vc;
-} // end selectTime
+    return {vc, picker};
+}

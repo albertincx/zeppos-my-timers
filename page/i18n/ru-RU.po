@@ -15,3 +15,27 @@ msgstr "Повтор"
 
 msgid "Finished"
 msgstr "Закончен"
+
+msgid "Time"
+msgstr "Время"
+
+msgid "Delete?"
+msgstr "Удалить таймер?"
+
+msgid "No"
+msgstr "Нет"
+
+msgid "About"
+msgstr "О программе"
+
+msgid "Discussion Chat"
+msgstr "Обсуждения"
+
+msgid "Home"
+msgstr "Назад"
+
+msgid "Yes!"
+msgstr "Да"
+
+msgid "No!"
+msgstr "Нет"

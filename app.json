@@ -32,6 +32,7 @@
         "page": {
           "pages": [
             "src/pages/alarm",
+            "src/pages/about",
             "src/pages/timer_run"
           ]
         },

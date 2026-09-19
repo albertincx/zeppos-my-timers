@@ -9,7 +9,7 @@ AppService({
         this.delayAlarm(params);
     },
     delayAlarm(params) {
-        log.log('SERVICE params 1', params)
+        log.debug('SERVICE params 1', params)
         const {appId} = getPackageInfo();
         const alarm = {
             appid: appId,

@@ -1,0 +1,18 @@
+msgid "COUNTDOWN"
+msgstr "Countdown"
+
+msgid "Timer"
+msgstr "Timer"
+
+
+msgid "Its time, Repeat?"
+msgstr "Its time, Repeat?"
+
+msgid "Go to App"
+msgstr "Go to App"
+
+msgid "Repeat"
+msgstr "Repeat"
+
+msgid "Finished"
+msgstr "Finished"

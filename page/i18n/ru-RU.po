@@ -1,0 +1,17 @@
+msgid "COUNTDOWN"
+msgstr "Обратный отсчет"
+
+msgid "Timer"
+msgstr "Таймер"
+
+msgid "Its time, Repeat?"
+msgstr "Время, Повторить?"
+
+msgid "Go to App"
+msgstr "Перейти в приложение"
+
+msgid "Repeat"
+msgstr "Повтор"
+
+msgid "Finished"
+msgstr "Закончен"

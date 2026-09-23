@@ -25,7 +25,7 @@ Page({
         // 1. App Title
         hmUI.createWidget(hmUI.widget.TEXT, {
             x: 0,
-            y: marginTop,
+            y: 1,
             w: DEVICE_WIDTH,
             h: 50,
             align_h: hmUI.align.CENTER_H,
@@ -55,14 +55,15 @@ Page({
             x: 20,
             y: marginTop,
             w: DEVICE_WIDTH - 40,
-            h: 90,
+            h: 240,
             align_h: hmUI.align.CENTER_H,
-            text: "Developer:\n Safiullin (safiullin.com)",
+            text: "Developer: Safiullin \nFeedback & Support:\n" +
+                "If you encounter any issues or \nhave suggestions, please \nfeel free to contact me \nat albertincx@gmail.com",
             text_size: 28,
             color: 0x409EFF,
         });
 
-        marginTop += 100;
+        marginTop += 260;
 
         // 4. "Discussion Chat" Button
         hmUI.createWidget(hmUI.widget.BUTTON, {
@@ -72,6 +73,7 @@ Page({
             text_size: 32,
             normal_color: 0x409EFF,
             press_color: 0x2d75bc,
+            h: 60,
             click_func: () => {
                 showModalWindow({
                     renderContent: (vc) => {
@@ -98,7 +100,7 @@ Page({
             },
         });
 
-        marginTop += Styles.BUTTON_LIST;
+        marginTop += 80;
 
         // 5. Home Button
         hmUI.createWidget(hmUI.widget.BUTTON, {
@@ -106,8 +108,9 @@ Page({
             y: marginTop,
             text: "↩️ " + getText('Home'),
             text_size: 32,
+            h: 55,
+            press_color: 0x409EFF,
             normal_color: 0x000000,
-            press_color: 0x000000,
             click_func: () => {
                 goHome()
             },

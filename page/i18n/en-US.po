@@ -36,3 +36,15 @@ msgstr "Yes"
 
 msgid "No!"
 msgstr "No"
+
+msgid "timer exists"
+msgstr "Timer is exists"
+
+msgid "ctimer wait"
+msgstr "Wait a minute"
+
+msgid "stopAll"
+msgstr "Stop All"
+
+msgid "delAll"
+msgstr "Delete All"

@@ -3,24 +3,21 @@ import hmUI from "@zos/ui";
 import {setScrollLock} from "@zos/page";
 import {getText} from "@zos/i18n";
 
-import * as Styles from "zosLoader:./style.[pf].layout.js";
+import * as Styles from "zosLoader:../styles/style.[pf].layout.js";
 
 import {DEVICE_HEIGHT, DEVICE_WIDTH, goHome, initSwipeBack} from "../utils/utils";
 import {showModalWindow} from "../components/showModalWindow";
 
-
-const {BUTTON_Y, TIMER_BTN} = Styles;
+const {TIMER_BTN} = Styles;
 
 Page({
     onInit(param) {
-        if (param === 'skip') {
-            setScrollLock({lock: false});
-        }
+        if (param === 'skip') setScrollLock({lock: false});
         initSwipeBack(-1)
     },
 
     build() {
-        let marginTop = BUTTON_Y + 20;
+        let marginTop = 20;
 
         // 1. App Title
         hmUI.createWidget(hmUI.widget.TEXT, {
@@ -49,21 +46,21 @@ Page({
         });
 
         marginTop += 60;
-
+        let infoHeight = 300
         // 3. Developer Info
         hmUI.createWidget(hmUI.widget.TEXT, {
             x: 20,
             y: marginTop,
             w: DEVICE_WIDTH - 40,
-            h: 240,
+            h: infoHeight,
             align_h: hmUI.align.CENTER_H,
             text: "Developer: Safiullin \nFeedback & Support:\n" +
-                "If you encounter any issues or \nhave suggestions, please \nfeel free to contact me \nat albertincx@gmail.com",
+                "If you encounter\n any issues or\n have suggestions, please \nfeel free to contact me \nat albertincx@gmail.com",
             text_size: 28,
             color: 0x409EFF,
         });
 
-        marginTop += 260;
+        marginTop += infoHeight;
 
         // 4. "Discussion Chat" Button
         hmUI.createWidget(hmUI.widget.BUTTON, {
@@ -111,9 +108,7 @@ Page({
             h: 55,
             press_color: 0x409EFF,
             normal_color: 0x000000,
-            click_func: () => {
-                goHome()
-            },
+            click_func: goHome,
         });
 
         hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {});

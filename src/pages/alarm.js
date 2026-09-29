@@ -1,5 +1,5 @@
 import {log} from "@zos/utils";
-import hmUI from "@zos/ui";
+import hmUI, {setStatusBarVisible} from "@zos/ui";
 import {replace} from "@zos/router";
 import * as alarmMgr from "@zos/alarm";
 import {getText} from "@zos/i18n";
@@ -7,7 +7,7 @@ import {showToast} from "@zos/interaction";
 
 import {setScrollLock} from '@zos/page'
 
-import * as Styles from "zosLoader:./style.[pf].layout.js";
+import * as Styles from "zosLoader:../styles/style.[pf].layout.js";
 
 import {putLiveTime} from "../components/time";
 import {showConfirm} from "../components/showConfirm";
@@ -28,7 +28,7 @@ import {
 import {selectTime, setupAlarm} from "../components/time/selectTime";
 import {ABOUT_TARGET, ALARM_KEY, COUNTDOWN_KEY} from "../config/constants";
 
-const {DEVICE_WIDTH, BUTTON_Y, TIMER_BTN} = Styles;
+const {DEVICE_WIDTH, TIMER_BTN, DELETE_BTN, EDIT_BTN} = Styles;
 const globalData = getApp()._options.globalData;
 
 let selectTimeVc = null;
@@ -57,9 +57,10 @@ Page({
     build() {
         let mcb = putLiveTime('main');
         updateCallbacks.push(mcb)
-
+        setStatusBarVisible && setStatusBarVisible(false)
         const that = this;
         const activeAlarms = alarmMgr.getAllAlarms();
+
         const conditionFunction = (k, v) => {
             const activeId = getActiveId(v);
             if (activeId) {
@@ -72,6 +73,7 @@ Page({
                 }
             }
         }
+
         const {active, notActive} = splitObjectByValue(
             globalData.localStorage.store,
             conditionFunction,
@@ -79,6 +81,7 @@ Page({
         let sortActiveObj = getSortedObj(active);
         let sortNotActiveObj = getSortedObj(notActive);
         sortActiveObj = sortObjectByTimeKeys(sortActiveObj);
+
         function listAlarms(alarms, fromLs = false, iiParam = 0) {
             if (alarms.length === 0) return 0
 
@@ -134,15 +137,12 @@ Page({
                             if (!activeId) {
                                 // start saved timer
                                 setupAlarm(dateFromStr, alarmNumOrKey);
-                                setTimeout(() => {
-                                    goHome()
-                                }, 50)
+                                setTimeout(goHome, 50)
                             } else {
                                 showToast({
-                                    content: `${showHumanTimerStr(name)}${isCountDown ? ' countdown' : ' timer'}`
+                                    content: `${showHumanTimerStr(name)}${isCountDown ? 'countdown' : 'timer'}`
                                 })
                             }
-                            log.debug('from ls')
                             return;
                         }
 
@@ -155,7 +155,7 @@ Page({
                             alarmTime: alarmTime || alarmNumOrKey,
                             dateFromStr,
                             isCountDown
-                        }, 75, BUTTON_Y + Styles.BUTTON_LIST * ii, click_func);
+                        }, 75, Styles.BUTTON_LIST * ii, click_func);
                         // put for redraw
                         updateCallbacks.push(updActiveTimer);
                     } else {
@@ -165,7 +165,7 @@ Page({
                             ...TIMER_BTN,
                             text_size: txtSize,
                             normal_color: activeId ? 0x1976d2 : TIMER_BTN.normal_color,
-                            y: BUTTON_Y + Styles.BUTTON_LIST * ii,
+                            y: Styles.BUTTON_LIST * ii,
                             text,
                             w: fromLs ? TIMER_BTN.w / 1.3 : TIMER_BTN.w,
                             click_func,
@@ -175,11 +175,11 @@ Page({
                         let leftMini = 95;
                         !isCountDown && hmUI.createWidget(hmUI.widget.BUTTON, {
                             ...TIMER_BTN,
-                            ...Styles.DELETE_BTN,
+                            ...DELETE_BTN,
                             text: '',
                             h: activeId ? TIMER_BTN.h / 2 - 5 : TIMER_BTN.h,
                             x: DEVICE_WIDTH / 2 + leftMini,
-                            y: BUTTON_Y + Styles.BUTTON_LIST * ii + 5,
+                            y: Styles.BUTTON_LIST * ii + 5,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
                                 showConfirm({
@@ -198,10 +198,10 @@ Page({
                         if (isCountDown) offsetEdit = 0;
                         activeId && hmUI.createWidget(hmUI.widget.BUTTON, {
                             ...TIMER_BTN,
-                            ...Styles.EDIT_BTN,
+                            ...EDIT_BTN,
                             h: !isCountDown ? TIMER_BTN.h / 2 - 5 : TIMER_BTN.h,
                             x: DEVICE_WIDTH / 2 + leftMini,
-                            y: BUTTON_Y + Styles.BUTTON_LIST * ii + offsetEdit,
+                            y: Styles.BUTTON_LIST * ii + offsetEdit,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
                                 showConfirm({
@@ -221,15 +221,14 @@ Page({
             });
 
             return ii
-        } // end listAlarms()
+        }
 
         // List notification list items
-        let marginTopItems = 0;
         let savedActiveAlarms = getSortedKeys(sortActiveObj);
         let savedNotActiveAlarms = getSortedKeys(sortNotActiveObj);
 
         // render saved active timers or countdowns
-        marginTopItems = listAlarms(savedActiveAlarms, true, marginTopItems);
+        let marginTopItems = listAlarms(savedActiveAlarms, true);
 
         // render saved not active timers or countdowns
         const marginTopItemsNA = listAlarms(savedNotActiveAlarms, true, marginTopItems);
@@ -251,7 +250,7 @@ Page({
             x: DEVICE_WIDTH / 4,
             text: '✚' + getText('Timer') + '⏰',
             text_size: 40,
-            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+            y: Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
                 let _selectTimeVc = selectTime(true)
                 selectTimeVc = _selectTimeVc.vc
@@ -268,7 +267,7 @@ Page({
             text_size: 40,
             press_color: 0x409EFF,
             normal_color: 0x409EFF,
-            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+            y: Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
                 let _selectTimeVc = selectTime(false)
                 selectTimeVc = _selectTimeVc.vc
@@ -288,7 +287,7 @@ Page({
             radius: 16,
             press_color: 0x409EFF,
             normal_color: 0x000000,
-            y: BUTTON_Y + Styles.BUTTON_LIST * marginTopItems,
+            y: Styles.BUTTON_LIST * marginTopItems,
             click_func: function () {
                 replace({
                     url: ABOUT_TARGET,

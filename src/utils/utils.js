@@ -134,14 +134,17 @@ export function splitObjectByValue(obj, condition) {
     return Object.entries(obj).reduce(
         (result, [key, value]) => {
             const activeId = condition(key, value);
-            if (typeof activeId === "number") {
-                if (activeId === -1) {
-                    // skip
+
+            if (`${value}`.match(/^(c_|t_)/)) {
+                if (typeof activeId === "number") {
+                    if (activeId === -1) {
+                        // skip
+                    } else {
+                        result.active[key] = value;
+                    }
                 } else {
-                    result.active[key] = value;
+                    result.notActive[key] = value;
                 }
-            } else {
-                result.notActive[key] = value;
             }
             return result;
         },

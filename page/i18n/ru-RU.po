@@ -39,3 +39,15 @@ msgstr "Да"
 
 msgid "No!"
 msgstr "Нет"
+
+msgid "timer exists"
+msgstr "Timer уже существует"
+
+msgid "ctimer wait"
+msgstr "Нужно подождать минуту"
+
+msgid "stopAll"
+msgstr "Стоп все!"
+
+msgid "delAll"
+msgstr "Удалить все"

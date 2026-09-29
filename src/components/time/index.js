@@ -4,7 +4,7 @@ import {Time} from "@zos/sensor";
 import {log} from "@zos/utils";
 import {getText} from "@zos/i18n";
 
-import * as Styles from "zosLoader:../../pages/style.[pf].layout.js";
+import * as Styles from "zosLoader:../../styles/style.[pf].layout.js";
 
 import {getSensorTime, getTimeStrMain, showHumanTimeStr} from "../../utils/utils";
 

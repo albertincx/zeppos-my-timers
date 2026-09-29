@@ -5,9 +5,8 @@ export const {width: DEVICE_WIDTH} = getDeviceInfo()
 
 export const BUTTON_X = px(30);
 export const BUTTON_W = DEVICE_WIDTH - 2 * BUTTON_X;
-export const MARGIN_TOP = 0;
 export const BUTTON_H = 110;
-export const BUTTON_LIST = BUTTON_H + MARGIN_TOP;
+export const BUTTON_LIST = BUTTON_H + 20;
 
 export const ADD_BUTTON = {
     x: BUTTON_X,
@@ -22,12 +21,12 @@ export const ADD_BUTTON = {
 export const DELETE_BTN = {
     normal_color: undefined,
     press_color: undefined,
-    normal_src: 'deleteIcon.png',
-    press_src: 'deleteIcon.png',
+    normal_src: 'raw/deleteIcon.png',
+    press_src: 'raw/deleteIcon.png',
 }
 export const EDIT_BTN = {
-    normal_src: 'stopIcon.png',
-    press_src: 'stopIcon.png',
+    normal_src: 'raw/stopIcon.png',
+    press_src: 'raw/stopIcon.png',
     normal_color: undefined,
     press_color: undefined,
 }

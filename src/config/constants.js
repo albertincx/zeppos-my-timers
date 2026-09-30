@@ -1,6 +1,6 @@
 export const ALARM_TARGET = "src/app-service/index";
 export const HOME_TARGET = "src/pages/alarm";
-export const REPEAT_TARGET = "src/pages/timer_run";
+export const REPEAT_TARGET = "src/pages/repeat";
 export const ABOUT_TARGET = "src/pages/about";
 
 export const ALARM_KEY = "alarmId";
@@ -13,3 +13,5 @@ export const CLEAR_KEY = new RegExp(`${ALARM_KEY}|${COUNTDOWN_KEY}`)
 
 export const DEF_TIMER_MIN = 5
 export const DEF_CNT_MIN = 1
+
+export const ACTION_CREATE = 'create'

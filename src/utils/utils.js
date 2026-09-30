@@ -224,7 +224,7 @@ export const initSwipeBack = (customCondition = null) => {
     });
 }
 
-export function formatHumanTime(str) {
+export function formatHumanTime(str, showType = true) {
     const isTimer = str.startsWith(TIMER_PREFIX)
     const [h, m, s] = str.split('_').pop().split(':').map(Number);
     const res = [];
@@ -235,7 +235,10 @@ export function formatHumanTime(str) {
     if (s > 0) res.push(`${s}${secLabel}`);
 
     let text = res.join(' ') || `0${secLabel}`;
-    return isTimer ? `${text} ${getText('Timer')}` : `${text} ${getText('COUNTDOWN')}`;
+
+    if (showType) return `${text} ${getText(isTimer ? 'Timer' : 'COUNTDOWN')}`;
+
+    return text;
 }
 
 export const goHome = () => {

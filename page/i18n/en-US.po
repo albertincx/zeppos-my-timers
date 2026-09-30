@@ -19,11 +19,11 @@ msgstr "Finished"
 msgid "Time"
 msgstr "Time"
 
-msgid "Delete?"
-msgstr "Delete?"
+msgid "Delete"
+msgstr "Delete"
 
-msgid "Stop?"
-msgstr "Stop?"
+msgid "Stop"
+msgstr "Stop"
 
 msgid "About"
 msgstr "About"
@@ -34,14 +34,14 @@ msgstr "Discussion Chat"
 msgid "Home"
 msgstr "Back"
 
-msgid "Yes!"
+msgid "Yes"
 msgstr "Yes"
 
-msgid "No!"
+msgid "No"
 msgstr "No"
 
 msgid "exists"
-msgstr "is exists"
+msgstr "you have this"
 
 msgid "c exists"
 msgstr "is running"

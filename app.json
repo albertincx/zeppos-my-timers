@@ -33,7 +33,7 @@
           "pages": [
             "src/pages/alarm",
             "src/pages/about",
-            "src/pages/timer_run"
+            "src/pages/repeat"
           ]
         },
         "app-service": {

@@ -19,11 +19,11 @@ msgstr "Закончен"
 msgid "Time"
 msgstr "Время"
 
-msgid "Delete?"
-msgstr "Удалить?"
+msgid "Delete"
+msgstr "Удалить"
 
-msgid "Stop?"
-msgstr "Остановить?"
+msgid "Stop"
+msgstr "Остановить"
 
 msgid "About"
 msgstr "О программе"
@@ -34,10 +34,10 @@ msgstr "Обсуждения"
 msgid "Home"
 msgstr "Назад"
 
-msgid "Yes!"
+msgid "Yes"
 msgstr "Да"
 
-msgid "No!"
+msgid "No"
 msgstr "Нет"
 
 msgid "exists"

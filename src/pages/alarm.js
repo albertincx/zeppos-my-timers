@@ -29,7 +29,7 @@ import {putLiveTime} from "../components/time";
 import {showConfirm} from "../components/showConfirm";
 import {selectTime, setupAlarm} from "../components/time/selectTime";
 
-const {DEVICE_WIDTH, TIMER_BTN, DELETE_BTN, EDIT_BTN, BUTTON_L} = Styles;
+const {DEVICE_WIDTH, TIMER_BTN, DELETE_BTN, EDIT_BTN, BUTTON_L, BUTTON_LIST} = Styles;
 const globalData = getApp()._options.globalData;
 
 let selectTimeVc = null;
@@ -58,7 +58,13 @@ Page({
         setStatusBarVisible && setStatusBarVisible(false)
         const that = this;
         const activeAlarms = alarmMgr.getAllAlarms();
+        // log.debug('_____store')
 
+        // for (const [key, value] of Object.entries(globalData.localStorage.store)) {
+            // log.debug('')
+            // log.debug(key, value)
+            // if (key.startsWith('last')) globalData.localStorage.removeItem(key)
+        // }
         const conditionFunction = (k, v) => {
             const activeId = getActiveId(v);
             if (activeId) {
@@ -138,7 +144,7 @@ Page({
                                 setupAlarm(dateFromStr, alarmNumOrKey);
                                 setTimeout(goHome, 50)
                             } else {
-                                showToast({content: tLabel})
+                                showToast({content: formatHumanTime(storeValCleared, false)})
                             }
                             return;
                         }
@@ -152,7 +158,7 @@ Page({
                             alarmTime: alarmTime || alarmNumOrKey,
                             dateFromStr,
                             isCountDown
-                        }, 75, Styles.BUTTON_LIST * ii, click_func);
+                        }, 75, BUTTON_LIST * ii, click_func);
                         // put for redraw
                         updateCallbacks.push(updActiveTimer);
                     } else {
@@ -162,7 +168,7 @@ Page({
                             ...TIMER_BTN,
                             text_size: txtSize,
                             normal_color: activeId ? 0x1976d2 : TIMER_BTN.normal_color,
-                            y: Styles.BUTTON_LIST * ii,
+                            y: BUTTON_LIST * ii,
                             text,
                             w: fromLs ? TIMER_BTN.w / 1.3 : TIMER_BTN.w,
                             click_func,
@@ -176,18 +182,19 @@ Page({
                             text: '',
                             h: activeId ? TIMER_BTN.h / 2 - 5 : TIMER_BTN.h,
                             x: DEVICE_WIDTH / 2 + leftMini,
-                            y: Styles.BUTTON_LIST * ii + 5,
+                            y: BUTTON_LIST * ii + 5,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
                                 showConfirm({
-                                    message: tLabel + ' ' + getText('Delete?'),
+                                    message: getText('Delete') + '?\n' + tLabel,
                                     onConfirm: () => {
                                         let deleteAlarm = activeId || alarmNumOrKey;
                                         globalData.localStorage.removeItem(alarmNumOrKey);
                                         if (deleteAlarm) alarmMgr.cancel(deleteAlarm);
                                         goHome()
                                     },
-                                    icon: "🗑️ ",
+                                    icon: '',
+                                    label: getText('Delete'),
                                 });
                             },
                         });
@@ -198,16 +205,17 @@ Page({
                             ...EDIT_BTN,
                             h: !isCountDown ? TIMER_BTN.h / 2 - 5 : TIMER_BTN.h,
                             x: DEVICE_WIDTH / 2 + leftMini,
-                            y: Styles.BUTTON_LIST * ii + offsetEdit,
+                            y: BUTTON_LIST * ii + offsetEdit,
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
                                 showConfirm({
-                                    message: tLabel + ' ' + getText('Stop?'),
+                                    message: getText('Stop') + '?\n' + tLabel,
                                     onConfirm: () => {
                                         alarmMgr.cancel(activeId);
                                         goHome()
                                     },
-                                    icon: "⏹️ ",
+                                    icon: '',
+                                    label: getText('Stop'),
                                 });
                             },
                         });
@@ -247,7 +255,7 @@ Page({
             x: DEVICE_WIDTH / 4 - BUTTON_L,
             text: '✚' + getText('Timer') + '⏰',
             text_size: 40,
-            y: (Styles.BUTTON_LIST * marginTopItems),
+            y: BUTTON_LIST * marginTopItems,
             click_func: function () {
                 let _selectTimeVc = selectTime(true)
                 selectTimeVc = _selectTimeVc.vc
@@ -264,7 +272,7 @@ Page({
             text_size: 40,
             press_color: 0x409EFF,
             normal_color: 0x409EFF,
-            y: Styles.BUTTON_LIST * marginTopItems,
+            y: BUTTON_LIST * marginTopItems,
             click_func: function () {
                 let _selectTimeVc = selectTime(false)
                 selectTimeVc = _selectTimeVc.vc
@@ -284,7 +292,7 @@ Page({
             radius: 16,
             press_color: 0x409EFF,
             normal_color: 0x000000,
-            y: Styles.BUTTON_LIST * marginTopItems,
+            y: BUTTON_LIST * marginTopItems,
             click_func: function () {
                 replace({
                     url: ABOUT_TARGET,

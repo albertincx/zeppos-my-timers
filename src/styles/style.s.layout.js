@@ -1,22 +1,17 @@
 import {px} from "@zos/utils";
 import {getDeviceInfo} from "@zos/device";
+import {getLanguage} from "@zos/settings";
 
 export const {width: DEVICE_WIDTH} = getDeviceInfo()
 
+const currentLang = getLanguage()
+
 export const BUTTON_X = px(30);
+export const BUTTON_L = currentLang === 4 ? 20 : 0;
+
 export const BUTTON_W = DEVICE_WIDTH - 2 * BUTTON_X;
 export const BUTTON_H = 110;
 export const BUTTON_LIST = BUTTON_H + 20;
-
-export const ADD_BUTTON = {
-    x: BUTTON_X,
-    w: BUTTON_W,
-    h: px(60),
-    press_color: 0x333,
-    normal_color: 3355443,
-    radius: 12,
-    text_size: 28,
-}
 
 export const DELETE_BTN = {
     normal_color: undefined,

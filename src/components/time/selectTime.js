@@ -10,7 +10,6 @@ import {
     clearParam,
     DEVICE_HEIGHT,
     DEVICE_WIDTH,
-    formatHumanTime,
     getAlarmTime,
     getTimeStr,
     goHome
@@ -51,6 +50,12 @@ export function setupAlarm(alarmTime, timer = false) {
         }
         let id;
         alarmObj.time = getAlarmTime(alarmTime);
+        if (isNaN(alarmObj.time)) {
+            log.debug('cant setup id, something wrong isNaN');
+            showToast({content: 'error'})
+            return false;
+        }
+
         let paramVal = `${timer ? 't_' : 'c_'}${alarmObj.time}${name ? `_${name}` : ''}`;
         alarmObj.param = paramVal;
         log.debug('\nalarmTime1 = ', alarmTime, name)
@@ -70,21 +75,19 @@ export function setupAlarm(alarmTime, timer = false) {
             }
         }
         if (id === 0) {
+            // cant setup
             log.debug('cant setup id, something wrong');
-            showToast({content: 'error'})
-            return false;
-        }
-
-        if (exists) {
-            const tLabel = formatHumanTime(clearParam(exists))
-            log.debug(tLabel, exists)
-            showToast({content: tLabel + ' ' + getText(isCreateTimer ? 'c exists' : 'exists')})
-            return false
+            return;
         }
 
         if (timer) {
-            if (isCreateTimer && exists) paramVal = '';
-        } else if (exists) paramVal = '';
+            if (isCreateTimer && exists) {
+                paramVal = '';
+            }
+        } else if (exists) {
+            paramVal = '';
+        }
+
         // save to localStorage
         if (paramVal) {
             if (isStartTimer || (!timer && !exists)) {
@@ -92,6 +95,10 @@ export function setupAlarm(alarmTime, timer = false) {
             }
             globalData.localStorage.setItem(STORE_KEY, paramVal);
             return true
+        } else {
+            if (exists) {
+                showToast({content: getText(!timer ? 'c exists' : 'exists')})
+            }
         }
     } catch (e) {
         log.debug(`error ${e}`);

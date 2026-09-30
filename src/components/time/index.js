@@ -85,7 +85,7 @@ export function putLiveTime(name, x, y, click_func) {
             let txtSize = text.length >= 10 ? 36 : 38;
             const tW = Math.floor(TIMER_BTN.w / 1.3)
             const ww = (tW / 100) * percent
-            if (isCountDown) text = `Countdown\n${text}`
+            if (isCountDown) text = `${getText('COUNTDOWN')}\n${text}`
             const btn = hmUI.createWidget(hmUI.widget.BUTTON, {
                 ...TIMER_BTN,
                 y: y || 40,
@@ -135,7 +135,7 @@ export function putLiveTime(name, x, y, click_func) {
             let percent = obj.percent || 100;
             if (obj.end) percent = 0;
 
-            if (isCountDown) text = `Countdown\n${text}`;
+            if (isCountDown) text = `${getText('COUNTDOWN')}\n${text}`;
 
             let txtSize = text.length >= 10 ? 36 : 38;
             animTimers[name].wid.setProperty(hmUI.prop.TEXT_SIZE, txtSize)

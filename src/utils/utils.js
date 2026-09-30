@@ -4,9 +4,12 @@ import {getText} from "@zos/i18n";
 import {replace} from "@zos/router";
 import {GESTURE_RIGHT, onGesture} from "@zos/interaction";
 
-import {ACTIVE_REGEXP, ALARM_KEY, CLEAR_KEY, COUNTDOWN_KEY, HOME_TARGET} from "../config/constants";
+import {ACTIVE_REGEXP, ALARM_KEY, CLEAR_KEY, COUNTDOWN_KEY, HOME_TARGET, TIMER_PREFIX} from "../config/constants";
 
 const timeSensor = new Time();
+let hLabel = `${getText('h')}`
+let mLabel = `${getText('m')}`
+let sLabel = `${getText('s')}`
 
 export const {height: DEVICE_HEIGHT, width: DEVICE_WIDTH} = getDeviceInfo();
 
@@ -32,9 +35,9 @@ export const getTimerStr = (v, end = '') => {
 export const showHumanTimerStr = (name) => {
     let names = name.split(':');
     if (names.length === 3) {
-        let h = getTimerStr(names[0], 'h ');
-        let m = getTimerStr(names[1], 'm ');
-        let s = getTimerStr(names[2], 's');
+        let h = getTimerStr(names[0], hLabel + ' ');
+        let m = getTimerStr(names[1], mLabel + ' ');
+        let s = getTimerStr(names[2], sLabel);
 
         return `${h}${m}${s}`;
     }
@@ -51,9 +54,9 @@ export const showHumanTimeStr = (timeObj, endStr = false) => {
     let sepM = ':';
     let endS = '';
     if (endStr) {
-        sepH = 'h '
-        sepM = 'm '
-        endS = 's '
+        sepH = hLabel + ' '
+        sepM = mLabel + ' '
+        endS = sLabel
     }
     if (!h) hs = sepH = '';
     if (!m && !h) ms = sepM = '';
@@ -193,8 +196,7 @@ export const getSortedObj = (obj) => {
     for (let sk = 0; sk < sKeys.length; sk += 1) {
         let sKey = sKeys[sk];
         if (sKey && (
-            `${sKey}`.match(ALARM_KEY)
-            || `${sKey}`.match(COUNTDOWN_KEY)
+            `${sKey}`.match(ALARM_KEY) || `${sKey}`.match(COUNTDOWN_KEY)
         )
         ) {
             let v = obj[sKey];
@@ -222,16 +224,18 @@ export const initSwipeBack = (customCondition = null) => {
     });
 }
 
-export function formatHumanTime(str, isTimer = false) {
+export function formatHumanTime(str) {
+    const isTimer = str.startsWith(TIMER_PREFIX)
     const [h, m, s] = str.split('_').pop().split(':').map(Number);
     const res = [];
+    const secLabel = getText('sec')
 
-    if (h > 0) res.push(`${h}h`);
-    if (m > 0) res.push(`${m}min`);
-    if (s > 0) res.push(`${s}sec`);
+    if (h > 0) res.push(`${h}${hLabel}`);
+    if (m > 0) res.push(`${m}${getText('min')}`);
+    if (s > 0) res.push(`${s}${secLabel}`);
 
-    let text = res.join(' ') || '0sec';
-    return isTimer ? `${text} timer` : `${text} countdown`;
+    let text = res.join(' ') || `0${secLabel}`;
+    return isTimer ? `${text} ${getText('Timer')}` : `${text} ${getText('COUNTDOWN')}`;
 }
 
 export const goHome = () => {
@@ -239,26 +243,4 @@ export const goHome = () => {
         url: HOME_TARGET,
         params: 'skip',
     });
-}
-
-/**
- * Сортирует активные элементы по оставшемуся времени (timeLeft) по возрастанию (сначала те, что ближе к концу)
- */
-export function sortActiveByTimeLeft(obj) {
-    const now = getSensorTime().getTime();
-
-    return Object.keys(obj)
-        .sort((aKey, bKey) => {
-            const timeA = parseInt(aKey) || 0; // Предполагаем, что ключ хранит таймстамп или передается в объекте
-            const timeB = parseInt(bKey) || 0;
-
-            const timeLeftA = timeA * 1000 - now;
-            const timeLeftB = timeB * 1000 - now;
-
-            return timeLeftA - timeLeftB; // Сортировка по возрастанию (меньше времени -> выше в списке)
-        })
-        .reduce((sortedObj, key) => {
-            sortedObj[key] = obj[key];
-            return sortedObj;
-        }, {});
 }

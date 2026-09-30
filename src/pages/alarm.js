@@ -4,15 +4,13 @@ import {replace} from "@zos/router";
 import * as alarmMgr from "@zos/alarm";
 import {getText} from "@zos/i18n";
 import {showToast} from "@zos/interaction";
-
 import {setScrollLock} from '@zos/page'
 
 import * as Styles from "zosLoader:../styles/style.[pf].layout.js";
 
-import {putLiveTime} from "../components/time";
-import {showConfirm} from "../components/showConfirm";
 import {
     clearParam,
+    formatHumanTime,
     getActiveId,
     getSortedKeys,
     getSortedObj,
@@ -25,10 +23,13 @@ import {
     sortObjectByTimeKeys,
     splitObjectByValue
 } from "../utils/utils";
-import {selectTime, setupAlarm} from "../components/time/selectTime";
 import {ABOUT_TARGET, ALARM_KEY, COUNTDOWN_KEY} from "../config/constants";
 
-const {DEVICE_WIDTH, TIMER_BTN, DELETE_BTN, EDIT_BTN} = Styles;
+import {putLiveTime} from "../components/time";
+import {showConfirm} from "../components/showConfirm";
+import {selectTime, setupAlarm} from "../components/time/selectTime";
+
+const {DEVICE_WIDTH, TIMER_BTN, DELETE_BTN, EDIT_BTN, BUTTON_L} = Styles;
 const globalData = getApp()._options.globalData;
 
 let selectTimeVc = null;
@@ -40,10 +41,7 @@ Page({
         activeIds: [],
     },
     onInit(param) {
-        if (param === 'skip') {
-            setScrollLock({lock: false});
-        }
-        // Очищаем массив при инициализации
+        if (param === 'skip') setScrollLock({lock: false});
         updateCallbacks = [];
 
         const runScheduledTask = () => {
@@ -78,6 +76,7 @@ Page({
             globalData.localStorage.store,
             conditionFunction,
         );
+
         let sortActiveObj = getSortedObj(active);
         let sortNotActiveObj = getSortedObj(notActive);
         sortActiveObj = sortObjectByTimeKeys(sortActiveObj);
@@ -89,12 +88,12 @@ Page({
             // render alarms
             alarms.forEach((alarmNumOrKey) => {
                 const A_KEY = fromLs ? alarmNumOrKey : `${ALARM_KEY}${alarmNumOrKey}`;
-                if (!fromLs && that.state.activeIds.includes(alarmNumOrKey)) {
-                    return;
-                }
-                let storeVal = globalData.localStorage.getItem(A_KEY);
+                if (!fromLs && that.state.activeIds.includes(alarmNumOrKey)) return;
 
+                let storeVal = globalData.localStorage.getItem(A_KEY);
                 const isCountDown = !!A_KEY.match(COUNTDOWN_KEY);
+                const storeValCleared = clearParam(storeVal)
+                const tLabel = formatHumanTime(storeValCleared)
 
                 if (!fromLs && !storeVal) {
                     storeVal = globalData.localStorage.getItem(`${COUNTDOWN_KEY}${alarmNumOrKey}`)
@@ -103,7 +102,7 @@ Page({
                 let activeId = getActiveId(storeVal)
                 if (activeId) {
                     if (!activeAlarms.includes(activeId)) {
-                        storeVal = clearParam(storeVal)
+                        storeVal = storeValCleared
                         timeRaw = storeVal
                         globalData.localStorage.setItem(A_KEY, storeVal);
                         activeId = false
@@ -139,9 +138,7 @@ Page({
                                 setupAlarm(dateFromStr, alarmNumOrKey);
                                 setTimeout(goHome, 50)
                             } else {
-                                showToast({
-                                    content: `${showHumanTimerStr(name)}${isCountDown ? 'countdown' : 'timer'}`
-                                })
+                                showToast({content: tLabel})
                             }
                             return;
                         }
@@ -183,7 +180,7 @@ Page({
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
                                 showConfirm({
-                                    message: getText('Delete?'),
+                                    message: tLabel + ' ' + getText('Delete?'),
                                     onConfirm: () => {
                                         let deleteAlarm = activeId || alarmNumOrKey;
                                         globalData.localStorage.removeItem(alarmNumOrKey);
@@ -205,7 +202,7 @@ Page({
                             w: TIMER_BTN.w / 5,
                             click_func: () => {
                                 showConfirm({
-                                    message: getText('Stop?'),
+                                    message: tLabel + ' ' + getText('Stop?'),
                                     onConfirm: () => {
                                         alarmMgr.cancel(activeId);
                                         goHome()
@@ -239,18 +236,18 @@ Page({
 
         if (marginTopItemsA) marginTopItems = marginTopItemsA;
 
-        const sB = {...Styles.TIMER_BTN};
+        const sB = {...TIMER_BTN};
 
         marginTopItems += 1;
 
         hmUI.createWidget(hmUI.widget.BUTTON, {
             ...sB,
             h: TIMER_BTN.h,
-            w: DEVICE_WIDTH / 2,
-            x: DEVICE_WIDTH / 4,
+            w: DEVICE_WIDTH / 2 + BUTTON_L,
+            x: DEVICE_WIDTH / 4 - BUTTON_L,
             text: '✚' + getText('Timer') + '⏰',
             text_size: 40,
-            y: Styles.BUTTON_LIST * marginTopItems,
+            y: (Styles.BUTTON_LIST * marginTopItems),
             click_func: function () {
                 let _selectTimeVc = selectTime(true)
                 selectTimeVc = _selectTimeVc.vc

@@ -22,6 +22,9 @@ msgstr "Time"
 msgid "Delete?"
 msgstr "Delete?"
 
+msgid "Stop?"
+msgstr "Stop?"
+
 msgid "About"
 msgstr "About"
 
@@ -37,8 +40,11 @@ msgstr "Yes"
 msgid "No!"
 msgstr "No"
 
-msgid "timer exists"
-msgstr "Timer is exists"
+msgid "exists"
+msgstr "is exists"
+
+msgid "c exists"
+msgstr "is running"
 
 msgid "ctimer wait"
 msgstr "Wait a minute"
@@ -48,3 +54,42 @@ msgstr "Stop All"
 
 msgid "delAll"
 msgstr "Delete All"
+
+msgid "about_desc"
+msgstr "Developer: Safiullin \nFeedback & Support:\nIf you encounter\n any issues or\n have suggestions, please \nfeel free to contact me \nat albertincx@gmail.com"
+
+msgid "My timers"
+msgstr "My timers"
+
+msgid "version"
+msgstr "version"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Create timer"
+msgstr "Create timer"
+
+msgid "Hour"
+msgstr "Hour"
+
+msgid "Min"
+msgstr "Min"
+
+msgid "Sec"
+msgstr "Sec"
+
+msgid "h"
+msgstr "h"
+
+msgid "m"
+msgstr "m"
+
+msgid "s"
+msgstr "s"
+
+msgid "min"
+msgstr "min"
+
+msgid "sec"
+msgstr "sec"

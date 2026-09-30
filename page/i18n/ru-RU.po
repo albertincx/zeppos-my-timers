@@ -1,14 +1,14 @@
 msgid "COUNTDOWN"
-msgstr "Обратный отсчет"
+msgstr "Отсчет"
 
 msgid "Timer"
 msgstr "Таймер"
 
 msgid "Its time, Repeat?"
-msgstr "Время, Повторить?"
+msgstr "Время! Повторить?"
 
 msgid "Go to App"
-msgstr "Перейти в приложение"
+msgstr "В приложение"
 
 msgid "Repeat"
 msgstr "Повтор"
@@ -20,10 +20,10 @@ msgid "Time"
 msgstr "Время"
 
 msgid "Delete?"
-msgstr "Удалить таймер?"
+msgstr "Удалить?"
 
-msgid "No"
-msgstr "Нет"
+msgid "Stop?"
+msgstr "Остановить?"
 
 msgid "About"
 msgstr "О программе"
@@ -40,8 +40,11 @@ msgstr "Да"
 msgid "No!"
 msgstr "Нет"
 
-msgid "timer exists"
-msgstr "Timer уже существует"
+msgid "exists"
+msgstr "уже существует"
+
+msgid "c exists"
+msgstr "уже запущен"
 
 msgid "ctimer wait"
 msgstr "Нужно подождать минуту"
@@ -51,3 +54,42 @@ msgstr "Стоп все!"
 
 msgid "delAll"
 msgstr "Удалить все"
+
+msgid "about_desc"
+msgstr "Разработчик: Safiullin \nОтзывы и поддержка:\nЕсли вы столкнулись с\n любыми проблемами или\n есть предложения,\n пожалуйста \nнапишите \nна albertincx@gmail.com"
+
+msgid "My timers"
+msgstr "Мои таймеры"
+
+msgid "version"
+msgstr "версия"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Create timer"
+msgstr "Создать таймер"
+
+msgid "Hour"
+msgstr "Час"
+
+msgid "Min"
+msgstr "Мин"
+
+msgid "Sec"
+msgstr "Сек"
+
+msgid "h"
+msgstr "ч"
+
+msgid "m"
+msgstr "м"
+
+msgid "s"
+msgstr "с"
+
+msgid "min"
+msgstr "мин"
+
+msgid "sec"
+msgstr "сек"

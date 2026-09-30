@@ -8,7 +8,7 @@ export function showConfirm({message, onConfirm, onCancel, icon = ''}) {
         alpha: 150,
         buttons: [
             {
-                text: getText(icon + 'Yes!'),
+                text: icon + getText('Yes!'),
                 normal_color: 0x409EFF,
                 press_color: 0x2d75bc,
                 click_func: () => {

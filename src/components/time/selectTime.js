@@ -1,14 +1,17 @@
 import hmUI from "@zos/ui";
 import {log} from "@zos/utils";
 import * as alarmMgr from "@zos/alarm";
+import {showToast} from "@zos/interaction";
+import {getText} from "@zos/i18n";
+import {setScrollLock} from "@zos/page";
 
 import {
     addZeroToVal,
     clearParam,
     DEVICE_HEIGHT,
     DEVICE_WIDTH,
+    formatHumanTime,
     getAlarmTime,
-    getSensorTime,
     getTimeStr,
     goHome
 } from "../../utils/utils";
@@ -17,11 +20,11 @@ import {ALARM_KEY, ALARM_TARGET, COUNTDOWN_KEY, DEF_CNT_MIN, DEF_TIMER_MIN} from
 
 const globalData = getApp()._options.globalData;
 
-let oldDate;
 let changedHour;
 let changedMin;
 let changedSec;
 let dateTime = new Date();
+
 let alarmObj = {
     url: ALARM_TARGET,
     store: true,
@@ -67,29 +70,34 @@ export function setupAlarm(alarmTime, timer = false) {
             }
         }
         if (id === 0) {
-            // cant setup
             log.debug('cant setup id, something wrong');
-            return;
+            showToast({content: 'error'})
+            return false;
+        }
+
+        if (exists) {
+            const tLabel = formatHumanTime(clearParam(exists))
+            log.debug(tLabel, exists)
+            showToast({content: tLabel + ' ' + getText(isCreateTimer ? 'c exists' : 'exists')})
+            return false
         }
 
         if (timer) {
-            if (isCreateTimer && exists) {
-                paramVal = '';
-            }
-        } else if (exists) {
-            paramVal = '';
-        }
-
+            if (isCreateTimer && exists) paramVal = '';
+        } else if (exists) paramVal = '';
         // save to localStorage
         if (paramVal) {
             if (isStartTimer || (!timer && !exists)) {
                 paramVal = clearParam(paramVal) + `_=${id}=`;
             }
             globalData.localStorage.setItem(STORE_KEY, paramVal);
+            return true
         }
     } catch (e) {
         log.debug(`error ${e}`);
     }
+
+    return false
 }
 
 function hideDialog(vc) {
@@ -99,8 +107,6 @@ function hideDialog(vc) {
 
 const timePickerCb = (isTimer = false, vc) => (picker, event_type, column, value_index) => {
     const dTime = dateTime;
-
-    oldDate = getSensorTime();
 
     if (event_type === 1) {
         // update
@@ -124,16 +130,17 @@ const timePickerCb = (isTimer = false, vc) => (picker, event_type, column, value
         if (!changedMin) dTime.setMinutes(isTimer ? DEF_TIMER_MIN : DEF_CNT_MIN);
         if (!changedSec) dTime.setSeconds(0);
 
-        setupAlarm(dTime, isTimer);
+        const isCreated = setupAlarm(dTime, isTimer);
         hideDialog(vc);
 
         changedHour = undefined
         changedMin = undefined
         changedSec = undefined
-
-        setTimeout(() => {
-            goHome()
-        }, 50)
+        if (isCreated) {
+            setTimeout(goHome, 50)
+        } else {
+            setScrollLock({lock: false});
+        }
     }
 }
 
@@ -157,26 +164,27 @@ export function selectTime(isTimer = false) {
     changedSec = false;
 
     vc.createWidget(hmUI.widget.WIDGET_PICKER, {
-        title: isTimer ? 'Create timer' : 'CountDown',
+        title: getText(isTimer ? 'Create timer' : 'COUNTDOWN'),
         nb_of_columns: 3,
         data_config: [
             {
                 data_array: new Array(24)
-                    .fill(0).map((d, index) => `${addZeroToVal(index)}h`),
+                    .fill(0).map((d, index) => `${addZeroToVal(index)}${getText('h')}`),
                 init_val_index: h,
-                unit: 'Hour',
+                unit: getText('Hour'),
                 support_loop: true,
             },
             {
                 data_array: new Array(60)
-                    .fill(0).map((d, index) => `${addZeroToVal(index)}m`),
+                    .fill(0).map((d, index) => `${addZeroToVal(index)}${getText('m')}`),
                 init_val_index: m,
-                unit: 'Min',
+                unit: getText('Min'),
             },
             {
-                data_array: new Array(60).fill(0).map((d, index) => `${addZeroToVal(index)}s`),
+                data_array: new Array(60).fill(0)
+                    .map((d, index) => `${addZeroToVal(index)}${getText('s')}`),
                 init_val_index: 0,
-                unit: 'Sec',
+                unit: getText('Sec'),
             },
         ],
         picker_cb: timePickerCb(isTimer, vc),

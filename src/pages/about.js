@@ -2,6 +2,7 @@ import {log} from "@zos/utils";
 import hmUI from "@zos/ui";
 import {setScrollLock} from "@zos/page";
 import {getText} from "@zos/i18n";
+import {getLanguage} from "@zos/settings";
 
 import * as Styles from "zosLoader:../styles/style.[pf].layout.js";
 
@@ -9,6 +10,7 @@ import {DEVICE_HEIGHT, DEVICE_WIDTH, goHome, initSwipeBack} from "../utils/utils
 import {showModalWindow} from "../components/showModalWindow";
 
 const {TIMER_BTN} = Styles;
+const currentLang = getLanguage()
 
 Page({
     onInit(param) {
@@ -26,7 +28,7 @@ Page({
             w: DEVICE_WIDTH,
             h: 50,
             align_h: hmUI.align.CENTER_H,
-            text: "⏰ My timers",
+            text: "⏰ " + getText('My timers'),
             text_size: 38,
             color: 0xffffff,
         });
@@ -40,13 +42,13 @@ Page({
             w: DEVICE_WIDTH,
             h: 40,
             align_h: hmUI.align.CENTER_H,
-            text: "Version: 2.0",
+            text: getText('version') + ": 6.0",
             text_size: 26,
             color: 0xaaaaaa,
         });
 
         marginTop += 60;
-        let infoHeight = 300
+        let infoHeight = currentLang === 4 ? 330 : 300
         // 3. Developer Info
         hmUI.createWidget(hmUI.widget.TEXT, {
             x: 20,
@@ -54,8 +56,7 @@ Page({
             w: DEVICE_WIDTH - 40,
             h: infoHeight,
             align_h: hmUI.align.CENTER_H,
-            text: "Developer: Safiullin \nFeedback & Support:\n" +
-                "If you encounter\n any issues or\n have suggestions, please \nfeel free to contact me \nat albertincx@gmail.com",
+            text: getText('about_desc'),
             text_size: 28,
             color: 0x409EFF,
         });
@@ -88,7 +89,7 @@ Page({
                     },
                     buttons: [
                         {
-                            text: "Close",
+                            text: getText('Close'),
                             normal_color: 0x555555,
                             press_color: 0x333333,
                         }

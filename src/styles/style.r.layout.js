@@ -1,9 +1,15 @@
 import {px} from "@zos/utils";
 import {getDeviceInfo} from "@zos/device";
+import {getLanguage} from "@zos/settings";
 
 export const {width: DEVICE_WIDTH} = getDeviceInfo()
 
+const currentLang = getLanguage()
+
 export const BUTTON_X = px(70);
+
+export const BUTTON_L = currentLang === 4 ? 20 : 0;
+
 export const BUTTON_W = DEVICE_WIDTH - 2 * BUTTON_X;
 export const BUTTON_H = 120;
 export const BUTTON_LIST = BUTTON_H + 20;

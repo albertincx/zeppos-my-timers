@@ -59,7 +59,7 @@ msgid "about_desc"
 msgstr "Developer: Safiullin \nFeedback & Support:\nIf you encounter\n any issues or\n have suggestions, please \nfeel free to contact me \nat albertincx@gmail.com"
 
 msgid "My timers"
-msgstr "My timers"
+msgstr "My Timers"
 
 msgid "version"
 msgstr "version"

@@ -59,7 +59,7 @@ msgid "about_desc"
 msgstr "Разработчик: Safiullin \nОтзывы и поддержка:\nЕсли вы столкнулись с\n любыми проблемами или\n есть предложения,\n пожалуйста \nнапишите \nна albertincx@gmail.com"
 
 msgid "My timers"
-msgstr "Мои таймеры"
+msgstr "Мои Таймеры"
 
 msgid "version"
 msgstr "версия"
